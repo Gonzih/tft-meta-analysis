@@ -4,8 +4,9 @@ import HTTP
 import JSON
 using MD5
 using Printf
+using Glob
 
-export load_league, load_summoner, load_matches_for, load_match, scrape_match, scrape_summoner, scrape_league
+export load_league, load_summoner, load_matches_for, load_match, scrape_match, scrape_summoner, scrape_league, all_matches_from_cache
 
 SLEEP = 1
 
@@ -66,6 +67,11 @@ end
 function scrape_league(l)
     ldata = load_league(l)
     map(scrape_summoner, ldata["entries"])
+end
+
+function all_matches_from_cache()
+    files = glob("match-*.json", "cache/")
+    map((fname) -> JSON.parse(open(f->read(f, String), fname)), files)
 end
 
 
