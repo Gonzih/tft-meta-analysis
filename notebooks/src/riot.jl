@@ -122,8 +122,8 @@ function parse_match(rd::RiotData, match)
             itemNames = unit["itemNames"]
             items = unit["items"]
             df = DataFrame(CharacterID=unit["character_id"],
-                           Name=itemNames,
-                           Item=items,
+                           Item=itemNames,
+                           ItemID=items,
                            MatchID=match["metadata"]["match_id"],
                            PUUID=participant["puuid"],
                            )
