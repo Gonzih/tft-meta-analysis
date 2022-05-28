@@ -1,0 +1,16 @@
+IMAGE_NAME := docker-julia-jupyter
+
+docker-start: build-docker-image
+	docker run --gpus all --net=host -v $(shell pwd)/notebooks:/notebooks -ti $(IMAGE_NAME)
+
+docker-shell: build-docker-image
+	docker run --gpus all --net=host -v $(shell pwd)/notebooks:/notebooks -ti $(IMAGE_NAME) julia
+
+docker-start-no-gpus: build-docker-image
+	docker run --net=host -v $(shell pwd)/notebooks:/notebooks -ti $(IMAGE_NAME)
+
+docker-shell-no-gpus: build-docker-image
+	docker run --net=host -v $(shell pwd)/notebooks:/notebooks -ti $(IMAGE_NAME) julia
+
+build-docker-image:
+	docker build -t $(IMAGE_NAME) .
