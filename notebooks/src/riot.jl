@@ -5,9 +5,8 @@ import JSON
 using MD5
 using Printf
 
-export load_league, load_summoner, load_matches_for, load_match
+export load_league, load_summoner, load_matches_for, load_match, scrape_match, scrape_summoner, scrape_league
 
-API_KEY = "RGAPI-4214d6be-472d-4dbc-aaf9-d3e9456b12b7"
 SLEEP = 1
 
 function riot_get(routing, path; cache_key = "get")
@@ -18,6 +17,7 @@ function riot_get(routing, path; cache_key = "get")
         @printf "Loading %s -> %s\n" url cache_fname
 
         sleep(SLEEP)
+        API_KEY = ENV["RIOT_API_KEY"]
 	      r = HTTP.get(url, ["X-Riot-Token" => API_KEY]; verbose=0)
         open(cache_fname, "w") do io
             write(io, String(r.body))
@@ -45,6 +45,27 @@ end
 function load_match(id)
     @printf "Loading match %s\n" id
     return riot_get("americas", @sprintf("tft/match/v1/matches/%s", id); cache_key = "match")
+end
+
+
+# SCRAPING FNS
+
+function scrape_match(id)
+    mdata = load_match(id)
+    mdata
+end
+
+function scrape_summoner(data)
+    id = data["summonerId"]
+    sdata = load_summoner(id)
+    puuid = sdata["puuid"]
+    matches = load_matches_for(puuid)
+    map(scrape_match, matches)
+end
+
+function scrape_league(l)
+    ldata = load_league(l)
+    map(scrape_summoner, ldata["entries"])
 end
 
 
