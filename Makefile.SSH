@@ -1,2 +1,0 @@
-proxy-timescale:
-	ssh -vN -L 5433:172.17.0.1:5432 -p 6633 coderat@163.172.137.108
