@@ -5,8 +5,9 @@ import JSON
 using MD5
 using Printf
 using Glob
+using DataFrames
 
-export load_league, load_summoner, load_matches_for, load_match, scrape_match, scrape_summoner, scrape_league, all_matches_from_cache
+export load_league, load_summoner, load_matches_for, load_match, scrape_match, scrape_summoner, scrape_league, all_matches_from_cache, matches_df
 
 SLEEP = 1
 
@@ -29,22 +30,18 @@ function riot_get(routing, path; cache_key = "get")
 end
 
 function load_league(league)
-    @printf "Loading league %s\n" league
     return riot_get("na1", @sprintf("tft/league/v1/%s", league))
 end
 
 function load_summoner(id)
-    @printf "Loading summoner %s\n" id
-    return riot_get("na1", @sprintf("tft/summoner/v1/summoners/%s", id))
+    return riot_get("na1", @sprintf("tft/summoner/v1/summoners/%s", id); cache_key = "summoner")
 end
 
 function load_matches_for(puuid)
-    @printf "Loading matches for %s\n" puuid
     return riot_get("americas", @sprintf("tft/match/v1/matches/by-puuid/%s/ids", puuid))
 end
 
 function load_match(id)
-    @printf "Loading match %s\n" id
     return riot_get("americas", @sprintf("tft/match/v1/matches/%s", id); cache_key = "match")
 end
 
@@ -72,6 +69,78 @@ end
 function all_matches_from_cache()
     files = glob("match-*.json", "cache/")
     map((fname) -> JSON.parse(open(f->read(f, String), fname)), files)
+end
+
+struct RiotData
+    participants::DataFrame
+    augments::DataFrame
+    traits::DataFrame
+    units::DataFrame
+    items::DataFrame
+end
+
+function parse_match(rd::RiotData, match)
+    for participant in match["info"]["participants"]
+        df = DataFrame(Placement=participant["placement"],
+                       Level=participant["level"],
+                       DamageToPlayers=participant["total_damage_to_players"],
+                       LastRound=participant["last_round"],
+                       MatchID=match["metadata"]["match_id"],
+                       PUUID=participant["puuid"],
+                       )
+        append!(rd.participants, df)
+
+        augs = participant["augments"]
+        df = DataFrame(Augment=augs,
+                       MatchID=match["metadata"]["match_id"],
+                       PUUID=participant["puuid"],
+                       )
+        append!(rd.augments, df)
+
+        traits = participant["traits"]
+        df = DataFrame(Trait=map(t->t["name"], traits),
+                       NumUnits=map(t->t["num_units"], traits),
+                       Style=map(t->t["style"], traits),
+                       TierCurrent=map(t->t["tier_current"], traits),
+                       TierTotal=map(t->t["tier_total"], traits),
+                       MatchID=match["metadata"]["match_id"],
+                       PUUID=participant["puuid"],
+                       )
+        append!(rd.traits, df)
+
+        units = participant["units"]
+        df = DataFrame(CharacterID=map(u->u["character_id"], units),
+                       Name=map(u->u["name"], units),
+                       Rarity=map(u->u["rarity"], units),
+                       Tier=map(u->u["tier"], units),
+                       MatchID=match["metadata"]["match_id"],
+                       PUUID=participant["puuid"],
+                       )
+        append!(rd.units, df)
+
+        for unit in units
+            itemNames = unit["itemNames"]
+            items = unit["items"]
+            df = DataFrame(CharacterID=unit["character_id"],
+                           Name=itemNames,
+                           Item=items,
+                           MatchID=match["metadata"]["match_id"],
+                           PUUID=participant["puuid"],
+                           )
+            append!(rd.items, df)
+        end
+
+    end
+end
+
+function matches_df()::RiotData
+    files = glob("match-*.json", "cache/")
+    match_data = map((fname) -> JSON.parse(open(f->read(f, String), fname)), files)
+
+    rd = RiotData(DataFrame(), DataFrame(), DataFrame(), DataFrame(), DataFrame())
+    foreach(m->parse_match(rd, m), match_data)
+
+    rd
 end
 
 
