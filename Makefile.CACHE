@@ -1,0 +1,2 @@
+clear-cache:
+  cd notebooks/cache && git clean -fd
