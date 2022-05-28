@@ -8,11 +8,11 @@ using Printf
 export load_league, load_summoner, load_matches_for, load_match
 
 API_KEY = "RGAPI-4214d6be-472d-4dbc-aaf9-d3e9456b12b7"
-SLEEP = 0.5
+SLEEP = 1
 
-function riot_get(routing, path)
+function riot_get(routing, path; cache_key = "get")
 	  url = @sprintf("https://%s.api.riotgames.com/%s", routing, path)
-    cache_fname = @sprintf("cache/%s.json", bytes2hex(md5(url)))
+    cache_fname = @sprintf("cache/%s-%s.json", cache_key, bytes2hex(md5(url)))
 
     if !isfile(cache_fname)
         @printf "Loading %s -> %s\n" url cache_fname
@@ -44,7 +44,7 @@ end
 
 function load_match(id)
     @printf "Loading match %s\n" id
-    return riot_get("americas", @sprintf("tft/match/v1/matches/%s", id))
+    return riot_get("americas", @sprintf("tft/match/v1/matches/%s", id); cache_key = "match")
 end
 
 
