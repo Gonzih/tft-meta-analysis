@@ -8,7 +8,7 @@ using Printf
 export load_league, load_summoner, load_matches_for, load_match
 
 API_KEY = "RGAPI-4214d6be-472d-4dbc-aaf9-d3e9456b12b7"
-SLEEP = 0.1
+SLEEP = 0.5
 
 function riot_get(routing, path)
 	  url = @sprintf("https://%s.api.riotgames.com/%s", routing, path)
