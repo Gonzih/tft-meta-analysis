@@ -26,23 +26,23 @@ function riot_get(routing, path; cache_key = "get")
         end
     end
 
-    return JSON.parse(open(f->read(f, String), cache_fname))
+    JSON.parse(open(f->read(f, String), cache_fname))
 end
 
 function load_league(league)
-    return riot_get("na1", @sprintf("tft/league/v1/%s", league))
+    riot_get("na1", @sprintf("tft/league/v1/%s", league))
 end
 
 function load_summoner(id)
-    return riot_get("na1", @sprintf("tft/summoner/v1/summoners/%s", id); cache_key = "summoner")
+    riot_get("na1", @sprintf("tft/summoner/v1/summoners/%s", id); cache_key = "summoner")
 end
 
 function load_matches_for(puuid)
-    return riot_get("americas", @sprintf("tft/match/v1/matches/by-puuid/%s/ids", puuid))
+    riot_get("americas", @sprintf("tft/match/v1/matches/by-puuid/%s/ids", puuid))
 end
 
 function load_match(id)
-    return riot_get("americas", @sprintf("tft/match/v1/matches/%s", id); cache_key = "match")
+    riot_get("americas", @sprintf("tft/match/v1/matches/%s", id); cache_key = "match")
 end
 
 
@@ -79,6 +79,10 @@ struct RiotData
     items::DataFrame
 end
 
+function clean_label(s::String)::String
+    replace(s, "TFT6_Augment_" => "", "TFT6_" => "", "TFT_Item_" => "", "Set6_" => "")
+end
+
 function parse_match(rd::RiotData, match)
     for participant in match["info"]["participants"]
         df = DataFrame(Placement=participant["placement"],
@@ -90,7 +94,7 @@ function parse_match(rd::RiotData, match)
                        )
         append!(rd.participants, df)
 
-        augs = participant["augments"]
+        augs = map(clean_label, participant["augments"])
         df = DataFrame(Augment=augs,
                        MatchID=match["metadata"]["match_id"],
                        PUUID=participant["puuid"],
@@ -98,7 +102,7 @@ function parse_match(rd::RiotData, match)
         append!(rd.augments, df)
 
         traits = participant["traits"]
-        df = DataFrame(Trait=map(t->t["name"], traits),
+        df = DataFrame(Trait=map(t->clean_label(t["name"]), traits),
                        NumUnits=map(t->t["num_units"], traits),
                        Style=map(t->t["style"], traits),
                        TierCurrent=map(t->t["tier_current"], traits),
@@ -109,8 +113,8 @@ function parse_match(rd::RiotData, match)
         append!(rd.traits, df)
 
         units = participant["units"]
-        df = DataFrame(CharacterID=map(u->u["character_id"], units),
-                       Name=map(u->u["name"], units),
+        df = DataFrame(CharacterID=map(u->clean_label(u["character_id"]), units),
+                       CharacterName=map(u->u["name"], units),
                        Rarity=map(u->u["rarity"], units),
                        Tier=map(u->u["tier"], units),
                        MatchID=match["metadata"]["match_id"],
@@ -119,7 +123,7 @@ function parse_match(rd::RiotData, match)
         append!(rd.units, df)
 
         for unit in units
-            itemNames = unit["itemNames"]
+            itemNames = map(clean_label, unit["itemNames"])
             items = unit["items"]
             df = DataFrame(CharacterID=unit["character_id"],
                            Item=itemNames,
