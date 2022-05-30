@@ -23,66 +23,8 @@ begin
 	using Gadfly
 	using FreqTables
 	using DataFrames
-end
-
-# ╔═╡ 748ebda8-8124-40b2-9a84-fd1d9576214c
-begin
 	using HypertextLiteral
 	using Random
-	
-	function champ_selector(champs, selected_champs)
-		id = randstring(['0':'9'; 'a':'f'])
-		
-		@htl("""
-		<div id=$(id) style="border: 1px solid red">
-			<div id="__render_target"></div>
-		    <script>
-		    	const selectorDiv = document.getElementById($(id));
-				const renderTarget = document.getElementById("__render_target");
-		
-				selectorDiv.value = selectorDiv.value || [];
-				const all_champs = $(champs);
-					console.log($(selected_champs));
-		        const not_selected = all_champs.filter((c) => !selectorDiv.value.includes(c))
-
-				function render(){	
-					renderTarget.innerHTML = '';
-					renderChamps(selectorDiv.value, "rm_link", rmChamp);
-					renderTarget.appendChild(document.createElement("br"));
-					renderChamps(not_selected, "add_link", addChamp);
-				}
-
-				function addChamp(champ) {
-					console.log("Adding", champ);
-					selectorDiv.value.push(champ);
-					selectorDiv.dispatchEvent(new Event('input'));
-					render();
-				}
-
-				function rmChamp(champ) {
-					console.log("Removing", champ);
-					selectorDiv.value = selectorDiv.value.filter((c) => c != champ);
-					selectorDiv.dispatchEvent(new Event('input'));
-					render();
-				}
-
-				function renderChamps(champs, klass, cb) {
-					champs.forEach((c) => {
-						const a = document.createElement("a");
-						a.innerText = c;
-						a.href="#";
-						a.class = klass;
-						a.addEventListener("click", (e) => { cb(c); e.preventDefault() });
-						renderTarget.appendChild(a);
-						renderTarget.appendChild(document.createElement("br"));
-					})
-				}
-
-				render();
-		    </script>
-		</div> 
-		""")
-	end
 end
 
 # ╔═╡ 155b2371-2106-4095-90ab-02de813b8da7
@@ -99,17 +41,68 @@ module riot include("src/riot.jl") end
 # ╔═╡ a85f6282-f346-482d-a1bd-11b0a027631a
 rd = riot.Riot.matches_df()
 
+# ╔═╡ 748ebda8-8124-40b2-9a84-fd1d9576214c
+function champ_selector(champs)
+  id = randstring(['0':'9'; 'a':'f'])
+
+  @htl("""
+  <div id=$(id) style="border: 1px solid red">
+    <div id="__render_target"></div>
+      <script>
+      const selectorDiv = document.getElementById($(id));
+      const renderTarget = document.getElementById("__render_target");
+
+      selectorDiv.value = selectorDiv.value || [];
+      const all_champs = $(champs);
+      const not_selected = all_champs.filter((c) => !selectorDiv.value.includes(c))
+
+      function render(){
+        renderTarget.innerHTML = '';
+        renderChamps(selectorDiv.value, "rm_link", rmChamp);
+        renderTarget.appendChild(document.createElement("br"));
+        renderChamps(not_selected, "add_link", addChamp);
+      }
+
+      function addChamp(champ) {
+        console.log("Adding", champ);
+        selectorDiv.value.push(champ);
+        selectorDiv.dispatchEvent(new Event('input'));
+        render();
+      }
+
+      function rmChamp(champ) {
+        console.log("Removing", champ);
+        selectorDiv.value = selectorDiv.value.filter((c) => c != champ);
+        selectorDiv.dispatchEvent(new Event('input'));
+        render();
+      }
+
+      function renderChamps(champs, klass, cb) {
+        champs.forEach((c) => {
+          const a = document.createElement("a");
+          a.innerText = c;
+          a.href="#";
+          a.class = klass;
+          a.addEventListener("click", (e) => { cb(c); e.preventDefault() });
+          renderTarget.appendChild(a);
+          renderTarget.appendChild(document.createElement("br"));
+        })
+      }
+
+      render();
+      </script>
+  </div>
+  """)
+end
+
 # ╔═╡ e2dca12e-6cfa-44b4-a0ee-1a2b82cf36f5
 all_champs = unique(rd.units.CharacterID)
 
 # ╔═╡ f98ec07b-9a8a-4661-a5b1-5849ae4f8058
 @bind limit Slider(5:100)
 
-# ╔═╡ a2379cbc-8f1f-4120-86f8-749ebe92ad72
-selected_champs = []
-
 # ╔═╡ 286e7017-e748-4a51-b293-aa4dc8b483ff
-@bind current_champ champ_selector(sort(all_champs), selected_champs)
+@bind current_champ champ_selector(sort(all_champs))
 
 # ╔═╡ 24f310f0-d7d9-4d59-89c1-b536438ec2bc
 begin
@@ -132,7 +125,6 @@ begin
 
 	df = first(df, limit)
     p = plot(df, x=:Label, y=:Freq, Geom.bar(position=:dodge))
-	#selected_champs = current_champ
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -970,8 +962,7 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╠═748ebda8-8124-40b2-9a84-fd1d9576214c
 # ╠═e2dca12e-6cfa-44b4-a0ee-1a2b82cf36f5
 # ╠═155b2371-2106-4095-90ab-02de813b8da7
-# ╟─f98ec07b-9a8a-4661-a5b1-5849ae4f8058
-# ╠═a2379cbc-8f1f-4120-86f8-749ebe92ad72
+# ╠═f98ec07b-9a8a-4661-a5b1-5849ae4f8058
 # ╠═286e7017-e748-4a51-b293-aa4dc8b483ff
 # ╠═24f310f0-d7d9-4d59-89c1-b536438ec2bc
 # ╟─00000000-0000-0000-0000-000000000001
