@@ -31,8 +31,8 @@ end
 begin
 	using PlutoUI
 	
-	Gadfly.push_theme(:dark)
-	#set_default_plot_size(36cm, 15cm)
+	#Gadfly.push_theme(:dark)
+	set_default_plot_size(17cm, 11cm)
 end
 
 # ╔═╡ 940338a8-9c7e-41df-96cd-968db4aaa3e8
@@ -99,7 +99,7 @@ end
 all_champs = unique(rd.units.CharacterID)
 
 # ╔═╡ f98ec07b-9a8a-4661-a5b1-5849ae4f8058
-@bind limit Slider(5:100)
+@bind limit Slider(10:100)
 
 # ╔═╡ 286e7017-e748-4a51-b293-aa4dc8b483ff
 @bind current_champ champ_selector(sort(all_champs))
