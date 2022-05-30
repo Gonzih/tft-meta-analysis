@@ -6,13 +6,14 @@ ARG JULIA_URL=https://julialang-s3.julialang.org/bin/linux/x64/1.7
 ARG USER_NAME=julia
 
 EXPOSE 8888
+EXPOSE 1234
 USER root
 WORKDIR /
 
 # ==== Install system dependencies ====
 
 RUN apt update && apt upgrade -y && apt install -y \
-    curl tar
+    curl tar supervisor
 
 # ==== Install python crap ====
 
@@ -45,8 +46,7 @@ RUN useradd --no-log-init --system --uid ${USER_ID} \
 
 USER ${USER_NAME}
 
-RUN julia -e 'using Pkg; Pkg.add("IJulia"); Pkg.build("IJulia");'
+RUN julia -e 'using Pkg; Pkg.add(["IJulia", "Pluto"]); Pkg.build("IJulia");'
 
-WORKDIR /notebooks
-
-CMD ["jupyter", "lab", "--ip=0.0.0.0", "--no-browser", "--NotebookApp.token=token"]
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+CMD ["/usr/bin/supervisord"]
