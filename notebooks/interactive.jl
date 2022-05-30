@@ -31,7 +31,7 @@ end
 begin
 	using PlutoUI
 	
-	#Gadfly.push_theme(:dark)
+	Gadfly.push_theme(:dark)
 	set_default_plot_size(17cm, 11cm)
 end
 
