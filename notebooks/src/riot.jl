@@ -1,3 +1,5 @@
+include("./pkgs.jl")
+
 module Riot
 
 import HTTP
