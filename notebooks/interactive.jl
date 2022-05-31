@@ -216,6 +216,19 @@ end
 # ╔═╡ 940338a8-9c7e-41df-96cd-968db4aaa3e8
 module riot include("src/riot.jl") end
 
+# ╔═╡ 5844e0af-eed5-4346-90bb-1993faa2552d
+function viz_freq(coll; limit=10)
+	set_default_plot_size(17cm, 1cm*limit)
+	
+	ft = freqtable(coll)
+	df = DataFrame(Label = names(ft)[1], Freq = ft)
+	sort!(df, [:Freq], rev=true)
+
+	df = first(df, limit)
+	sort!(df, [:Freq])
+    plot(df, x=:Freq, y=:Label, Geom.bar(position=:dodge, orientation=:horizontal))
+end
+
 # ╔═╡ 547bb2ab-bdb9-4c6e-8efe-3926f079de71
 begin
 	f = @bind n_days NumberField(1:30; default = 7)
@@ -243,6 +256,18 @@ begin
 	"""
 end
 
+# ╔═╡ fae59dd1-03c4-459b-b7a8-83524a41f0aa
+function render_champ_items(c)
+	items = filter((r)->r.CharacterID == c, rd.items)
+	graph = viz_freq(items.Item; limit = 8)
+	
+	md"""
+	### $(c)
+	
+	$(graph)
+	"""
+end
+
 # ╔═╡ ce9a02c5-8803-4270-8fd8-af84274e7977
 begin
 	all_traits = unique(rd.traits.Trait)
@@ -265,7 +290,7 @@ end
 @bind trait_power FancyOptionPowerSelector(current_traits)
 
 # ╔═╡ 14613643-d5f9-40f6-b1e6-c37c314210a6
-begin
+if trait_power !== missing
 	trait_power_labels = [
 		md"  $(t) -> $(p)"
 		for (t, p) in Dict(pairs(trait_power))
@@ -274,6 +299,8 @@ begin
 	  ##### Looking for champions with following traits
 	  $(trait_power_labels)
 	"""
+else
+	waveform
 end
 
 # ╔═╡ 5141181e-8724-482a-8c8d-abf66bc849dc
@@ -308,19 +335,6 @@ begin
 	"""
 end
 
-# ╔═╡ 5844e0af-eed5-4346-90bb-1993faa2552d
-function viz_freq(coll; limit=10)
-	set_default_plot_size(17cm, 1cm*limit)
-	
-	ft = freqtable(coll)
-	df = DataFrame(Label = names(ft)[1], Freq = ft)
-	sort!(df, [:Freq], rev=true)
-
-	df = first(df, limit)
-	sort!(df, [:Freq])
-    plot(df, x=:Freq, y=:Label, Geom.bar(position=:dodge, orientation=:horizontal))
-end
-
 # ╔═╡ 24f310f0-d7d9-4d59-89c1-b536438ec2bc
 if current_champs !== missing
 	df = innerjoin(rd.units, rd.traits, rd.participants, on = [:MatchID, :PUUID])
@@ -353,18 +367,6 @@ if current_champs !== missing
 	"""
 else
 	waveform
-end
-
-# ╔═╡ fae59dd1-03c4-459b-b7a8-83524a41f0aa
-function render_champ_items(c)
-	items = filter((r)->r.CharacterID == c, rd.items)
-	graph = viz_freq(items.Item; limit = 8)
-	
-	md"""
-	### $(c)
-	
-	$(graph)
-	"""
 end
 
 # ╔═╡ 2f0059d1-e9e9-42af-a027-b5f82f247cbe
