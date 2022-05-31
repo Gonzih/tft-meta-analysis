@@ -1,0 +1,3 @@
+FROM docker-julia-jupyter
+
+COPY supervisord.conf.prod /etc/supervisor/conf.d/supervisord.conf
