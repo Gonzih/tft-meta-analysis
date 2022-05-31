@@ -1,0 +1,11 @@
+[supervisord]
+nodaemon=true
+
+[program:server]
+directory=/notebooks
+command=julia /notebooks/scripts/server.jl
+user=julia
+environment=HOME="/home/julia",USER="julia"
+redirect_stderr=true
+stdout_logfile=/dev/fd/1
+stdout_logfile_maxbytes=0

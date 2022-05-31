@@ -7,6 +7,7 @@ ARG USER_NAME=julia
 
 EXPOSE 8888
 EXPOSE 1234
+EXPOSE 2345
 USER root
 WORKDIR /
 
@@ -48,5 +49,5 @@ USER ${USER_NAME}
 RUN julia -e 'using Pkg; Pkg.add(["IJulia", "Pluto"]); Pkg.build("IJulia");'
 
 USER root
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY supervisord.conf.dev /etc/supervisor/conf.d/supervisord.conf
 CMD ["/usr/bin/supervisord"]

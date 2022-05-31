@@ -12,7 +12,7 @@ stdout_logfile_maxbytes=0
 
 [program:pluto]
 directory=/notebooks
-command=julia -e 'using Pluto; Pluto.run(;host="0.0.0.0")'
+command=julia /notebooks/scripts/pluto.jl
 user=julia
 environment=HOME="/home/julia",USER="julia"
 redirect_stderr=true
