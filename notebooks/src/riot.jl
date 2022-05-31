@@ -5,9 +5,10 @@ import JSON
 using MD5
 using Glob
 using DataFrames
+using CSV
 import Dates
 
-export load_league, load_summoner, load_matches_for, load_match, scrape_match, scrape_summoner, scrape_league, all_matches_from_cache, matches_df
+export load_league, load_summoner, load_matches_for, load_match, scrape_match, scrape_summoner, scrape_league, all_matches_from_cache, matches_df, export_all_data, import_all_data
 
 function riot_get(routing, path; cache_key = "get", sleep_duration = 1)
 	  url = "https://$(routing).api.riotgames.com/$(path)"
@@ -158,5 +159,18 @@ function matches_df(n_days::Int64)::RiotData
     rd
 end
 
+function export_all_data(data::RiotData)
+    dfs = Dict("participants" => data.participants, "augments" => data.augments, "traits" => data.traits, "units" => data.units, "items" => data.items)
+
+    for (fname, df) in dfs
+        CSV.write("data/$(fname).csv", df)
+    end
+end
+
+function import_all_data()
+    files = ["participants", "augments", "traits", "units", "items"]
+    dfs = map((f) -> DataFrame(CSV.File("data/$(f).csv")), files)
+    RiotData(dfs...)
+end
 
 end

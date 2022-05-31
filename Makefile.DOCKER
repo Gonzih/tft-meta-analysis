@@ -19,3 +19,6 @@ build-docker-image:
 
 docker-run-scrape: build-docker-image
 	docker run --gpus all $(DOCKER_ARGS) -ti $(IMAGE_NAME) su -c "julia /notebooks/scripts/scrape.jl" julia
+
+docker-run-export: build-docker-image
+	docker run --gpus all $(DOCKER_ARGS) -ti $(IMAGE_NAME) su -c "julia /notebooks/scripts/export.jl" julia
