@@ -32,25 +32,50 @@ begin
 	using PlutoUI
 	
 	Gadfly.push_theme(:dark)
-	set_default_plot_size(17cm, 11cm)
+	""
 end
 
 # ╔═╡ 940338a8-9c7e-41df-96cd-968db4aaa3e8
 module riot include("src/riot.jl") end
 
+# ╔═╡ 547bb2ab-bdb9-4c6e-8efe-3926f079de71
+begin
+	f = @bind n_days NumberField(1:30; default = 7)
+	md"""
+	### Select only matches from the last $(f) days
+	"""
+end
+
+# ╔═╡ 563f3666-80b8-4b0d-ae79-70e045e91249
+begin
+	placement_f = @bind placement_cutoff NumberField(1:8; default = 3)
+	md"""
+	### Select only partcicipants that took top $(placement_f) spots
+	"""
+end
+
 # ╔═╡ a85f6282-f346-482d-a1bd-11b0a027631a
-rd = riot.Riot.matches_df()
+begin
+	rd = riot.Riot.matches_df(n_days)
+	
+	md"""
+	##### Fetched matches for $(n_days) days
+	
+	##### Got $(length(rd.participants.PUUID)) participant rows
+	"""
+end
 
 # ╔═╡ 748ebda8-8124-40b2-9a84-fd1d9576214c
-function champ_selector(all_champs)
+function FancyMultiSelect(options)
   id = randstring(['0':'9'; 'a':'f'])
+  render_id = randstring(['0':'9'; 'a':'f'])
 
   @htl("""
 	<div id=$(id)>  
-		<div id="__render_target"></div>
+		<div id=$(render_id)></div>
 
   		<style>
-  			.champ_link {
+  			.option_link {
   				display: inline-block;
   				margin: 5px;
   				text-decoration: none;
@@ -58,7 +83,7 @@ function champ_selector(all_champs)
   				padding-top: 8px !important;
 			}
 
-			.champ_link { 
+			.option_link { 
 			  border-radius: 8px;
 			  border-style: none;
 			  box-sizing: border-box;
@@ -76,6 +101,7 @@ function champ_selector(all_champs)
 			  -webkit-user-select: none;
 			  touch-action: manipulation;
 			}
+		
   
   			.rm_link {
   				background-color: #d73f3f;
@@ -89,36 +115,36 @@ function champ_selector(all_champs)
 		<script>
 			console.log(this);
 			const selectorDiv = document.getElementById($(id));
-			const renderTarget = document.getElementById("__render_target");
+			const renderTarget = document.getElementById($(render_id));
 			
 			selectorDiv.value = selectorDiv.value || [];
-			const all_champs = $(all_champs);	
+			const all_options = $(options);	
 			
 			function render(){
-  				const not_selected = all_champs.filter((c) => !selectorDiv.value.includes(c));
+  				const not_selected = all_options.filter((c) => !selectorDiv.value.includes(c));
   
 				renderTarget.innerHTML = '';
-				renderChamps(selectorDiv.value, "champ_link rm_link", rmChamp);
+				renderOpts(selectorDiv.value, "option_link rm_link", rmOption);
 				renderTarget.appendChild(document.createElement("hr"));
-				renderChamps(not_selected, "champ_link add_link", addChamp);
+				renderOpts(not_selected, "option_link add_link", addOption);
 			}
 			
-			function addChamp(champ) {
-				console.log("Adding", champ);
-				selectorDiv.value.push(champ);
+			function addOption(opt) {
+				console.log("Adding", opt);
+				selectorDiv.value.push(opt);
 				selectorDiv.dispatchEvent(new Event('input'));
 				render();
 			}
 			
-			function rmChamp(champ) {
-				console.log("Removing", champ);
-				selectorDiv.value = selectorDiv.value.filter((c) => c != champ);
+			function rmOption(opt) {
+				console.log("Removing", opt);
+				selectorDiv.value = selectorDiv.value.filter((o) => o != opt);
 				selectorDiv.dispatchEvent(new Event('input'));
 				render();
 			}
 			
-			function renderChamps(champs, klass, cb) {
-				champs.forEach((c) => {
+			function renderOpts(opts, klass, cb) {
+				opts.forEach((c) => {
 					const a = document.createElement("a");
 					a.innerText = c;
 					a.href="#";
@@ -134,27 +160,160 @@ function champ_selector(all_champs)
   """)
 end
 
-# ╔═╡ e2dca12e-6cfa-44b4-a0ee-1a2b82cf36f5
-all_champs = unique(rd.units.CharacterID)
-
-# ╔═╡ 286e7017-e748-4a51-b293-aa4dc8b483ff
+# ╔═╡ ce9a02c5-8803-4270-8fd8-af84274e7977
 begin
-	champ_sel = @bind current_champs champ_selector(sort(all_champs))
-	limit_slider = @bind limit Slider(10:100)
-
+	all_traits = unique(rd.traits.Trait)
 	md"""
-	$(champ_sel)
-
-	Limit graph output: $(limit_slider)
+	  ##### Found $(length(all_traits)) total traits
 	"""
 end
 
-# ╔═╡ 24f310f0-d7d9-4d59-89c1-b536438ec2bc
+# ╔═╡ 3fc35f5b-9f74-47d8-954e-c77de5421146
 begin
+	trait_sel = @bind current_traits FancyMultiSelect(sort(all_traits))
+
+	md"""
+	## Select your traits:
+	$(trait_sel)
+	"""
+end
+
+# ╔═╡ ccb8f312-e129-46ef-b2c3-7f16dedd6434
+function FancyOptionPowerSelector(options)
+	return PlutoUI.combine() do Child	
+		inputs = [
+			md""" $(opt): $(
+				Child(opt, Slider(1:12))
+			)"""
+			
+			for opt in options
+		]
+		
+		md"""
+		  ##### Select
+		  $(inputs)
+		"""
+	end
+end
+
+# ╔═╡ e2107889-4dd2-4035-8408-b87010f033bb
+@bind trait_power FancyOptionPowerSelector(current_traits)
+
+# ╔═╡ 14613643-d5f9-40f6-b1e6-c37c314210a6
+begin
+	trait_power_labels = [
+		md"  $(t) -> $(p)"
+		for (t, p) in Dict(pairs(trait_power))
+	]
+	md"""
+	  ##### Looking for champions with following traits
+	  $(trait_power_labels)
+	"""
+end
+
+# ╔═╡ 5141181e-8724-482a-8c8d-abf66bc849dc
+begin
+	cdf = innerjoin(rd.units, rd.traits, rd.participants, on = [:MatchID, :PUUID])
+	trait_filter = Dict(String(k) => v for (k, v) in Dict(pairs(trait_power)))
+	all_champs = unique(rd.units.CharacterID)
+	if length(trait_filter) > 0
+		filtered_df = filter((r)-> 
+								r.Trait in keys(trait_filter) &&
+								r.NumUnits >= trait_filter[r.Trait],
+								cdf)
+		all_champs = unique(filtered_df.CharacterID)
+	end
+
+	md"""
+	  ##### Found $(length(all_champs)) total champions
+	"""
+end
+
+# ╔═╡ 286e7017-e748-4a51-b293-aa4dc8b483ff
+begin
+	champ_sel = @bind current_champs FancyMultiSelect(sort(all_champs))
+	limit_slider = @bind limit Slider(5:100;default=10)
+
+	md"""
+	## Select your champions:
+	$(champ_sel)
+
+	## Limit graph output: 
+	$(limit_slider)
+	"""
+end
+
+# ╔═╡ baec4e6a-1500-4fb8-a1a4-fde24a36b944
+begin
+	waveform = @htl("""
+	<style>
+	.waveform {
+	  --uib-size: 40px;
+	  --uib-speed: 1s;
+	  --uib-color: black;
+	  --uib-line-weight: 3.5px;
+	
+	  display: flex;
+	  flex-flow: row nowrap;
+	  align-items: center;
+	  justify-content: space-between;
+	  width: var(--uib-size);
+	  height: calc(var(--uib-size) * 0.9);
+	}
+	
+	.waveform__bar {
+	  width: var(--uib-line-weight);
+	  height: 100%;
+	  background-color: var(--uib-color);
+	}
+	
+	.waveform__bar:nth-child(1) {
+	  animation: grow var(--uib-speed) ease-in-out
+	    calc(var(--uib-speed) * -0.45) infinite;
+	}
+	
+	.waveform__bar:nth-child(2) {
+	  animation: grow var(--uib-speed) ease-in-out
+	    calc(var(--uib-speed) * -0.3) infinite;
+	}
+	
+	.waveform__bar:nth-child(3) {
+	  animation: grow var(--uib-speed) ease-in-out
+	    calc(var(--uib-speed) * -0.15) infinite;
+	}
+	
+	.waveform__bar:nth-child(4) {
+	  animation: grow var(--uib-speed) ease-in-out infinite;
+	}
+	
+	@keyframes grow {
+	  0%,
+	  100% {
+	    transform: scaleY(0.3);
+	  }
+	
+	  50% {
+	    transform: scaleY(1);
+	  }
+	}
+	</style>
+	<div class="waveform">
+	  <div class="waveform__bar"></div>
+	  <div class="waveform__bar"></div>
+	  <div class="waveform__bar"></div>
+	  <div class="waveform__bar"></div>
+	</div>
+	""")
+	
+	""
+end
+
+# ╔═╡ 24f310f0-d7d9-4d59-89c1-b536438ec2bc
+if current_champs !== missing
 	set_default_plot_size(17cm, 1cm*limit)
 	
 	df = innerjoin(rd.units, rd.participants, on = [:MatchID, :PUUID])
-	df = filter(r->r.Placement <= 3, df)
+	df = filter(r->r.Placement <= placement_cutoff, df)
 	groups = groupby(df, [:MatchID, :PUUID])
 	groups = filter(g->issubset(current_champs, g.CharacterID), groups)
 	other_champs = []
@@ -175,11 +334,13 @@ begin
     champ_plot = plot(df, x=:Freq, y=:Label, Geom.bar(position=:dodge, orientation=:horizontal))
 	
 	md"""
-	Selected champs: $(join(current_champs, ", "))
+	#### Selected champs: $(join(current_champs, ", "))
 	
-	Possible choices:
+	### Popular choices:
 	$(champ_plot)
 	"""
+else
+	waveform
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -1011,13 +1172,21 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 """
 
 # ╔═╡ Cell order:
-# ╠═056e46de-e041-11ec-24b8-89435398cd34
-# ╠═940338a8-9c7e-41df-96cd-968db4aaa3e8
-# ╠═a85f6282-f346-482d-a1bd-11b0a027631a
-# ╠═748ebda8-8124-40b2-9a84-fd1d9576214c
-# ╠═e2dca12e-6cfa-44b4-a0ee-1a2b82cf36f5
-# ╠═155b2371-2106-4095-90ab-02de813b8da7
-# ╠═286e7017-e748-4a51-b293-aa4dc8b483ff
-# ╠═24f310f0-d7d9-4d59-89c1-b536438ec2bc
+# ╟─056e46de-e041-11ec-24b8-89435398cd34
+# ╟─155b2371-2106-4095-90ab-02de813b8da7
+# ╟─baec4e6a-1500-4fb8-a1a4-fde24a36b944
+# ╟─748ebda8-8124-40b2-9a84-fd1d9576214c
+# ╟─ccb8f312-e129-46ef-b2c3-7f16dedd6434
+# ╟─940338a8-9c7e-41df-96cd-968db4aaa3e8
+# ╟─547bb2ab-bdb9-4c6e-8efe-3926f079de71
+# ╟─563f3666-80b8-4b0d-ae79-70e045e91249
+# ╟─a85f6282-f346-482d-a1bd-11b0a027631a
+# ╟─ce9a02c5-8803-4270-8fd8-af84274e7977
+# ╟─3fc35f5b-9f74-47d8-954e-c77de5421146
+# ╟─e2107889-4dd2-4035-8408-b87010f033bb
+# ╟─14613643-d5f9-40f6-b1e6-c37c314210a6
+# ╟─5141181e-8724-482a-8c8d-abf66bc849dc
+# ╟─286e7017-e748-4a51-b293-aa4dc8b483ff
+# ╟─24f310f0-d7d9-4d59-89c1-b536438ec2bc
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

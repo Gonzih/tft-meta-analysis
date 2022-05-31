@@ -3,20 +3,20 @@ module Riot
 import HTTP
 import JSON
 using MD5
-using Printf
 using Glob
 using DataFrames
+import Dates
 
 export load_league, load_summoner, load_matches_for, load_match, scrape_match, scrape_summoner, scrape_league, all_matches_from_cache, matches_df
 
 SLEEP = 1
 
 function riot_get(routing, path; cache_key = "get")
-	  url = @sprintf("https://%s.api.riotgames.com/%s", routing, path)
-    cache_fname = @sprintf("cache/%s-%s.json", cache_key, bytes2hex(md5(url)))
+	  url = "https://$(routing).api.riotgames.com/$(path)"
+    cache_fname = "cache/$(cache_key)-$(bytes2hex(md5(url))).json"
 
     if !isfile(cache_fname)
-        @printf "Loading %s -> %s\n" url cache_fname
+        print("Loading $(url) -> $(cache_fname)\n")
 
         sleep(SLEEP)
         API_KEY = ENV["RIOT_API_KEY"]
@@ -30,19 +30,19 @@ function riot_get(routing, path; cache_key = "get")
 end
 
 function load_league(league)
-    riot_get("na1", @sprintf("tft/league/v1/%s", league))
+    riot_get("na1", "tft/league/v1/$(league)")
 end
 
 function load_summoner(id)
-    riot_get("na1", @sprintf("tft/summoner/v1/summoners/%s", id); cache_key = "summoner")
+    riot_get("na1", "tft/summoner/v1/summoners/$(id)"; cache_key = "summoner")
 end
 
 function load_matches_for(puuid)
-    riot_get("americas", @sprintf("tft/match/v1/matches/by-puuid/%s/ids", puuid))
+    riot_get("americas", "tft/match/v1/matches/by-puuid/$(puuid)/ids")
 end
 
 function load_match(id)
-    riot_get("americas", @sprintf("tft/match/v1/matches/%s", id); cache_key = "match")
+    riot_get("americas", "tft/match/v1/matches/$(id)"; cache_key = "match")
 end
 
 
@@ -137,12 +137,20 @@ function parse_match(rd::RiotData, match)
     end
 end
 
-function matches_df()::RiotData
+function filter_by_datetime(m, n_days)::Bool
+    dt = m["info"]["game_datetime"]
+    diff = Dates.value((Dates.now() - Dates.unix2datetime(dt / 1000)))
+    diff = (div(diff, 1000 * 60 * 60 * 24))
+    diff <= n_days
+end
+
+function matches_df(n_days::Int64)::RiotData
     files = glob("match-*.json", "cache/")
-    match_data = map((fname) -> JSON.parse(open(f->read(f, String), fname)), files)
+    match_data = map((fname) -> JSON.parse(open(f -> read(f, String), fname)), files)
+    match_data = filter((m)->filter_by_datetime(m, n_days), match_data)
 
     rd = RiotData(DataFrame(), DataFrame(), DataFrame(), DataFrame(), DataFrame())
-    foreach(m->parse_match(rd, m), match_data)
+    foreach(m -> parse_match(rd, m), match_data)
 
     rd
 end
