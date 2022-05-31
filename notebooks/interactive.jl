@@ -297,7 +297,7 @@ end
 # ╔═╡ 286e7017-e748-4a51-b293-aa4dc8b483ff
 begin
 	champ_sel = @bind current_champs FancyMultiSelect(sort(all_champs))
-	limit_slider = @bind limit Slider(5:100;default=10)
+	limit_slider = @bind graph_h_limit Slider(5:100;default=10)
 
 	md"""
 	## Select your champions:
@@ -308,10 +308,21 @@ begin
 	"""
 end
 
-# ╔═╡ 24f310f0-d7d9-4d59-89c1-b536438ec2bc
-if current_champs !== missing
+# ╔═╡ 5844e0af-eed5-4346-90bb-1993faa2552d
+function viz_freq(coll; limit=10)
 	set_default_plot_size(17cm, 1cm*limit)
 	
+	ft = freqtable(coll)
+	df = DataFrame(Label = names(ft)[1], Freq = ft)
+	sort!(df, [:Freq], rev=true)
+
+	df = first(df, limit)
+	sort!(df, [:Freq])
+    plot(df, x=:Freq, y=:Label, Geom.bar(position=:dodge, orientation=:horizontal))
+end
+
+# ╔═╡ 24f310f0-d7d9-4d59-89c1-b536438ec2bc
+if current_champs !== missing
 	df = innerjoin(rd.units, rd.traits, rd.participants, on = [:MatchID, :PUUID])
 	df = filter(r->r.Placement <= placement_cutoff, df)
 	if length(trait_filter) > 0
@@ -332,19 +343,41 @@ if current_champs !== missing
 		end
 	end
 
-	ft = freqtable(other_champs)
-	df = DataFrame(Label = names(ft)[1], Freq = ft)
-	sort!(df, [:Freq], rev=true)
-
-	df = first(df, limit)
-	sort!(df, [:Freq])
-    champ_plot = plot(df, x=:Freq, y=:Label, Geom.bar(position=:dodge, orientation=:horizontal))
+    champ_plot = viz_freq(other_champs; limit = graph_h_limit)
 	
 	md"""
 	#### Selected champs: $(join(current_champs, ", "))
 	
 	### Popular choices:
 	$(champ_plot)
+	"""
+else
+	waveform
+end
+
+# ╔═╡ fae59dd1-03c4-459b-b7a8-83524a41f0aa
+function render_champ_items(c)
+	items = filter((r)->r.CharacterID == c, rd.items)
+	graph = viz_freq(items.Item; limit = 8)
+	
+	md"""
+	### $(c)
+	
+	$(graph)
+	"""
+end
+
+# ╔═╡ 2f0059d1-e9e9-42af-a027-b5f82f247cbe
+if current_champs !== missing
+	renders = [
+		render_champ_items(c)
+		for c in current_champs
+	]
+
+	md"""
+	  ## Popular items for selected champions:
+	
+	  $(renders)
 	"""
 else
 	waveform
@@ -1185,6 +1218,8 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╟─748ebda8-8124-40b2-9a84-fd1d9576214c
 # ╟─ccb8f312-e129-46ef-b2c3-7f16dedd6434
 # ╟─940338a8-9c7e-41df-96cd-968db4aaa3e8
+# ╟─5844e0af-eed5-4346-90bb-1993faa2552d
+# ╟─fae59dd1-03c4-459b-b7a8-83524a41f0aa
 # ╟─547bb2ab-bdb9-4c6e-8efe-3926f079de71
 # ╟─563f3666-80b8-4b0d-ae79-70e045e91249
 # ╟─a85f6282-f346-482d-a1bd-11b0a027631a
@@ -1195,5 +1230,6 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╟─5141181e-8724-482a-8c8d-abf66bc849dc
 # ╟─286e7017-e748-4a51-b293-aa4dc8b483ff
 # ╟─24f310f0-d7d9-4d59-89c1-b536438ec2bc
+# ╟─2f0059d1-e9e9-42af-a027-b5f82f247cbe
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

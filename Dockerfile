@@ -48,6 +48,7 @@ RUN useradd --no-log-init --system --uid ${USER_ID} \
 USER ${USER_NAME}
 RUN julia -e 'using Pkg; Pkg.add(["IJulia", "Pluto"]); Pkg.build("IJulia");'
 
+WORKDIR /notebooks
 USER root
 COPY supervisord.conf.dev /etc/supervisor/conf.d/supervisord.conf
 CMD ["/usr/bin/supervisord"]

@@ -16,3 +16,6 @@ docker-shell-no-gpus: build-docker-image
 
 build-docker-image:
 	docker build -t $(IMAGE_NAME) .
+
+docker-run-scrape: build-docker-image
+	docker run --gpus all $(DOCKER_ARGS) -ti $(IMAGE_NAME) su -c "julia /notebooks/scripts/scrape.jl" julia
