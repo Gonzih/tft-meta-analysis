@@ -35,34 +35,69 @@ begin
 	""
 end
 
-# ╔═╡ 940338a8-9c7e-41df-96cd-968db4aaa3e8
-module riot include("src/riot.jl") end
-
-# ╔═╡ 547bb2ab-bdb9-4c6e-8efe-3926f079de71
+# ╔═╡ baec4e6a-1500-4fb8-a1a4-fde24a36b944
 begin
-	f = @bind n_days NumberField(1:30; default = 7)
-	md"""
-	### Select only matches from the last $(f) days
-	"""
-end
-
-# ╔═╡ 563f3666-80b8-4b0d-ae79-70e045e91249
-begin
-	placement_f = @bind placement_cutoff NumberField(1:8; default = 3)
-	md"""
-	### Select only partcicipants that took top $(placement_f) spots
-	"""
-end
-
-# ╔═╡ a85f6282-f346-482d-a1bd-11b0a027631a
-begin
-	rd = riot.Riot.matches_df(n_days)
+	waveform = @htl("""
+	<style>
+	.waveform {
+	  --uib-size: 40px;
+	  --uib-speed: 1s;
+	  --uib-color: white;
+	  --uib-line-weight: 3.5px;
 	
-	md"""
-	##### Fetched matches for $(n_days) days
+	  display: flex;
+	  flex-flow: row nowrap;
+	  align-items: center;
+	  justify-content: space-between;
+	  width: var(--uib-size);
+	  height: calc(var(--uib-size) * 0.9);
+	}
 	
-	##### Got $(length(rd.participants.PUUID)) participant rows
-	"""
+	.waveform__bar {
+	  width: var(--uib-line-weight);
+	  height: 100%;
+	  background-color: var(--uib-color);
+	}
+	
+	.waveform__bar:nth-child(1) {
+	  animation: grow var(--uib-speed) ease-in-out
+	    calc(var(--uib-speed) * -0.45) infinite;
+	}
+	
+	.waveform__bar:nth-child(2) {
+	  animation: grow var(--uib-speed) ease-in-out
+	    calc(var(--uib-speed) * -0.3) infinite;
+	}
+	
+	.waveform__bar:nth-child(3) {
+	  animation: grow var(--uib-speed) ease-in-out
+	    calc(var(--uib-speed) * -0.15) infinite;
+	}
+	
+	.waveform__bar:nth-child(4) {
+	  animation: grow var(--uib-speed) ease-in-out infinite;
+	}
+	
+	@keyframes grow {
+	  0%,
+	  100% {
+	    transform: scaleY(0.3);
+	  }
+	
+	  50% {
+	    transform: scaleY(1);
+	  }
+	}
+	</style>
+	<div class="waveform">
+	  <div class="waveform__bar"></div>
+	  <div class="waveform__bar"></div>
+	  <div class="waveform__bar"></div>
+	  <div class="waveform__bar"></div>
+	</div>
+	""")
+	
+	""
 end
 
 # ╔═╡ 748ebda8-8124-40b2-9a84-fd1d9576214c
@@ -160,24 +195,6 @@ function FancyMultiSelect(options)
   """)
 end
 
-# ╔═╡ ce9a02c5-8803-4270-8fd8-af84274e7977
-begin
-	all_traits = unique(rd.traits.Trait)
-	md"""
-	  ##### Found $(length(all_traits)) total traits
-	"""
-end
-
-# ╔═╡ 3fc35f5b-9f74-47d8-954e-c77de5421146
-begin
-	trait_sel = @bind current_traits FancyMultiSelect(sort(all_traits))
-
-	md"""
-	## Select your traits:
-	$(trait_sel)
-	"""
-end
-
 # ╔═╡ ccb8f312-e129-46ef-b2c3-7f16dedd6434
 function FancyOptionPowerSelector(options)
 	return PlutoUI.combine() do Child	
@@ -194,6 +211,54 @@ function FancyOptionPowerSelector(options)
 		  $(inputs)
 		"""
 	end
+end
+
+# ╔═╡ 940338a8-9c7e-41df-96cd-968db4aaa3e8
+module riot include("src/riot.jl") end
+
+# ╔═╡ 547bb2ab-bdb9-4c6e-8efe-3926f079de71
+begin
+	f = @bind n_days NumberField(1:30; default = 7)
+	md"""
+	### Select only matches from the last $(f) days
+	"""
+end
+
+# ╔═╡ 563f3666-80b8-4b0d-ae79-70e045e91249
+begin
+	placement_f = @bind placement_cutoff NumberField(1:8; default = 3)
+	md"""
+	### Select only partcicipants that took top $(placement_f) spots
+	"""
+end
+
+# ╔═╡ a85f6282-f346-482d-a1bd-11b0a027631a
+begin
+	rd = riot.Riot.matches_df(n_days)
+	
+	md"""
+	##### Fetched matches for $(n_days) days
+	
+	##### Got $(length(rd.participants.PUUID)) participant rows
+	"""
+end
+
+# ╔═╡ ce9a02c5-8803-4270-8fd8-af84274e7977
+begin
+	all_traits = unique(rd.traits.Trait)
+	md"""
+	  ##### Found $(length(all_traits)) total traits
+	"""
+end
+
+# ╔═╡ 3fc35f5b-9f74-47d8-954e-c77de5421146
+begin
+	trait_sel = @bind current_traits FancyMultiSelect(sort(all_traits))
+
+	md"""
+	## Select your traits:
+	$(trait_sel)
+	"""
 end
 
 # ╔═╡ e2107889-4dd2-4035-8408-b87010f033bb
@@ -243,77 +308,19 @@ begin
 	"""
 end
 
-# ╔═╡ baec4e6a-1500-4fb8-a1a4-fde24a36b944
-begin
-	waveform = @htl("""
-	<style>
-	.waveform {
-	  --uib-size: 40px;
-	  --uib-speed: 1s;
-	  --uib-color: black;
-	  --uib-line-weight: 3.5px;
-	
-	  display: flex;
-	  flex-flow: row nowrap;
-	  align-items: center;
-	  justify-content: space-between;
-	  width: var(--uib-size);
-	  height: calc(var(--uib-size) * 0.9);
-	}
-	
-	.waveform__bar {
-	  width: var(--uib-line-weight);
-	  height: 100%;
-	  background-color: var(--uib-color);
-	}
-	
-	.waveform__bar:nth-child(1) {
-	  animation: grow var(--uib-speed) ease-in-out
-	    calc(var(--uib-speed) * -0.45) infinite;
-	}
-	
-	.waveform__bar:nth-child(2) {
-	  animation: grow var(--uib-speed) ease-in-out
-	    calc(var(--uib-speed) * -0.3) infinite;
-	}
-	
-	.waveform__bar:nth-child(3) {
-	  animation: grow var(--uib-speed) ease-in-out
-	    calc(var(--uib-speed) * -0.15) infinite;
-	}
-	
-	.waveform__bar:nth-child(4) {
-	  animation: grow var(--uib-speed) ease-in-out infinite;
-	}
-	
-	@keyframes grow {
-	  0%,
-	  100% {
-	    transform: scaleY(0.3);
-	  }
-	
-	  50% {
-	    transform: scaleY(1);
-	  }
-	}
-	</style>
-	<div class="waveform">
-	  <div class="waveform__bar"></div>
-	  <div class="waveform__bar"></div>
-	  <div class="waveform__bar"></div>
-	  <div class="waveform__bar"></div>
-	</div>
-	""")
-	
-	""
-end
-
 # ╔═╡ 24f310f0-d7d9-4d59-89c1-b536438ec2bc
 if current_champs !== missing
 	set_default_plot_size(17cm, 1cm*limit)
 	
-	df = innerjoin(rd.units, rd.participants, on = [:MatchID, :PUUID])
+	df = innerjoin(rd.units, rd.traits, rd.participants, on = [:MatchID, :PUUID])
 	df = filter(r->r.Placement <= placement_cutoff, df)
+	if length(trait_filter) > 0
+		df = filter((r)-> 
+						r.Trait in keys(trait_filter) &&
+						r.NumUnits >= trait_filter[r.Trait],
+						df)
+	end
+	
 	groups = groupby(df, [:MatchID, :PUUID])
 	groups = filter(g->issubset(current_champs, g.CharacterID), groups)
 	other_champs = []
