@@ -42,78 +42,125 @@ module riot include("src/riot.jl") end
 rd = riot.Riot.matches_df()
 
 # ╔═╡ 748ebda8-8124-40b2-9a84-fd1d9576214c
-function champ_selector(champs)
+function champ_selector(all_champs)
   id = randstring(['0':'9'; 'a':'f'])
 
   @htl("""
-  <div id=$(id) style="border: 1px solid red">
-    <div id="__render_target"></div>
-      <script>
-      const selectorDiv = document.getElementById($(id));
-      const renderTarget = document.getElementById("__render_target");
+	<div id=$(id)>  
+		<div id="__render_target"></div>
 
-      selectorDiv.value = selectorDiv.value || [];
-      const all_champs = $(champs);
-      const not_selected = all_champs.filter((c) => !selectorDiv.value.includes(c))
+  		<style>
+  			.champ_link {
+  				display: inline-block;
+  				margin: 5px;
+  				text-decoration: none;
+  				vertical-align: middle;
+  				padding-top: 8px !important;
+			}
 
-      function render(){
-        renderTarget.innerHTML = '';
-        renderChamps(selectorDiv.value, "rm_link", rmChamp);
-        renderTarget.appendChild(document.createElement("br"));
-        renderChamps(not_selected, "add_link", addChamp);
-      }
-
-      function addChamp(champ) {
-        console.log("Adding", champ);
-        selectorDiv.value.push(champ);
-        selectorDiv.dispatchEvent(new Event('input'));
-        render();
-      }
-
-      function rmChamp(champ) {
-        console.log("Removing", champ);
-        selectorDiv.value = selectorDiv.value.filter((c) => c != champ);
-        selectorDiv.dispatchEvent(new Event('input'));
-        render();
-      }
-
-      function renderChamps(champs, klass, cb) {
-        champs.forEach((c) => {
-          const a = document.createElement("a");
-          a.innerText = c;
-          a.href="#";
-          a.class = klass;
-          a.addEventListener("click", (e) => { cb(c); e.preventDefault() });
-          renderTarget.appendChild(a);
-          renderTarget.appendChild(document.createElement("br"));
-        })
-      }
-
-      render();
-      </script>
-  </div>
+			.champ_link { 
+			  border-radius: 8px;
+			  border-style: none;
+			  box-sizing: border-box;
+			  color: #FFFFFF;
+			  cursor: pointer;
+			  flex-shrink: 0;
+			  font-size: 16px;
+			  font-weight: 500;
+			  height: 2rem;
+			  padding: 0 1.6rem;
+			  text-align: center;
+			  text-shadow: rgba(0, 0, 0, 0.25) 0 3px 8px;
+			  transition: all .5s;
+			  user-select: none;
+			  -webkit-user-select: none;
+			  touch-action: manipulation;
+			}
+  
+  			.rm_link {
+  				background-color: #d73f3f;
+			}
+  
+  			.add_link {
+  				background-color: #3f82d7;
+			}
+  		</style>
+		
+		<script>
+			console.log(this);
+			const selectorDiv = document.getElementById($(id));
+			const renderTarget = document.getElementById("__render_target");
+			
+			selectorDiv.value = selectorDiv.value || [];
+			const all_champs = $(all_champs);	
+			
+			function render(){
+  				const not_selected = all_champs.filter((c) => !selectorDiv.value.includes(c));
+  
+				renderTarget.innerHTML = '';
+				renderChamps(selectorDiv.value, "champ_link rm_link", rmChamp);
+				renderTarget.appendChild(document.createElement("hr"));
+				renderChamps(not_selected, "champ_link add_link", addChamp);
+			}
+			
+			function addChamp(champ) {
+				console.log("Adding", champ);
+				selectorDiv.value.push(champ);
+				selectorDiv.dispatchEvent(new Event('input'));
+				render();
+			}
+			
+			function rmChamp(champ) {
+				console.log("Removing", champ);
+				selectorDiv.value = selectorDiv.value.filter((c) => c != champ);
+				selectorDiv.dispatchEvent(new Event('input'));
+				render();
+			}
+			
+			function renderChamps(champs, klass, cb) {
+				champs.forEach((c) => {
+					const a = document.createElement("a");
+					a.innerText = c;
+					a.href="#";
+					a.className = klass;
+					a.addEventListener("click", (e) => { cb(c); e.preventDefault() });
+					renderTarget.appendChild(a);
+				})
+			}
+			
+			render();
+		</script>
+	</div>
   """)
 end
 
 # ╔═╡ e2dca12e-6cfa-44b4-a0ee-1a2b82cf36f5
 all_champs = unique(rd.units.CharacterID)
 
-# ╔═╡ f98ec07b-9a8a-4661-a5b1-5849ae4f8058
-@bind limit Slider(10:100)
-
 # ╔═╡ 286e7017-e748-4a51-b293-aa4dc8b483ff
-@bind current_champ champ_selector(sort(all_champs))
+begin
+	champ_sel = @bind current_champs champ_selector(sort(all_champs))
+	limit_slider = @bind limit Slider(10:100)
+
+	md"""
+	$(champ_sel)
+
+	Limit graph output: $(limit_slider)
+	"""
+end
 
 # ╔═╡ 24f310f0-d7d9-4d59-89c1-b536438ec2bc
 begin
+	set_default_plot_size(17cm, 1cm*limit)
+	
 	df = innerjoin(rd.units, rd.participants, on = [:MatchID, :PUUID])
 	df = filter(r->r.Placement <= 3, df)
 	groups = groupby(df, [:MatchID, :PUUID])
-	groups = filter(g->issubset(current_champ, g.CharacterID), groups)
+	groups = filter(g->issubset(current_champs, g.CharacterID), groups)
 	other_champs = []
 	for g in groups
 		for c in g.CharacterID
-			if !(c in current_champ)
+			if !(c in current_champs)
 				push!(other_champs, c)
 			end
 		end
@@ -124,7 +171,15 @@ begin
 	sort!(df, [:Freq], rev=true)
 
 	df = first(df, limit)
-    p = plot(df, x=:Label, y=:Freq, Geom.bar(position=:dodge))
+	sort!(df, [:Freq])
+    champ_plot = plot(df, x=:Freq, y=:Label, Geom.bar(position=:dodge, orientation=:horizontal))
+	
+	md"""
+	Selected champs: $(join(current_champs, ", "))
+	
+	Possible choices:
+	$(champ_plot)
+	"""
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -962,7 +1017,6 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╠═748ebda8-8124-40b2-9a84-fd1d9576214c
 # ╠═e2dca12e-6cfa-44b4-a0ee-1a2b82cf36f5
 # ╠═155b2371-2106-4095-90ab-02de813b8da7
-# ╠═f98ec07b-9a8a-4661-a5b1-5849ae4f8058
 # ╠═286e7017-e748-4a51-b293-aa4dc8b483ff
 # ╠═24f310f0-d7d9-4d59-89c1-b536438ec2bc
 # ╟─00000000-0000-0000-0000-000000000001
