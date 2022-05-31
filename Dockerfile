@@ -45,10 +45,13 @@ RUN useradd --no-log-init --system --uid ${USER_ID} \
 
 # ========== Install IJulia as application user ==========
 
+ADD notebooks/src/pkgs.jl /tmp/pkgs.jl
 USER ${USER_NAME}
-RUN julia -e 'using Pkg; Pkg.add(["IJulia", "Pluto"]); Pkg.build("IJulia");'
+RUN julia /tmp/pkgs.jl
 
 WORKDIR /notebooks
+
 USER root
+RUN rm /tmp/pkgs.jl
 COPY supervisord.conf.dev /etc/supervisor/conf.d/supervisord.conf
 CMD ["/usr/bin/supervisord"]

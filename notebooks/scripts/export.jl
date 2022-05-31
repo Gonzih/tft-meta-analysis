@@ -1,7 +1,14 @@
-include("../src/pkgs.jl")
-
 include("../src/riot.jl")
 using Main.Riot
+using DataFrames
 
-df = matches_df(10000)
-export_data(df)
+println("Loading matches JSON")
+@time df = matches_df()
+println(describe(df.matches))
+
+println("Saving matches")
+@time export_all_data(df)
+
+@time df = import_all_data(10000)
+println(describe(df.matches))
+println("Test loaded matches")

@@ -11,7 +11,7 @@ import Dates
 export load_league, load_summoner, load_matches_for, load_match, scrape_match, scrape_summoner, scrape_league, all_matches_from_cache, matches_df, export_all_data, import_all_data
 
 function riot_get(routing, path; cache_key = "get", sleep_duration = 1)
-	  url = "https://$(routing).api.riotgames.com/$(path)"
+    url = "https://$(routing).api.riotgames.com/$(path)"
     cache_fname = "cache/$(cache_key)-$(bytes2hex(md5(url))).json"
 
     if !isfile(cache_fname)
@@ -19,13 +19,13 @@ function riot_get(routing, path; cache_key = "get", sleep_duration = 1)
 
         sleep(sleep_duration)
         API_KEY = ENV["RIOT_API_KEY"]
-	      r = HTTP.get(url, ["X-Riot-Token" => API_KEY]; verbose=0)
+        r = HTTP.get(url, ["X-Riot-Token" => API_KEY]; verbose = 0)
         open(cache_fname, "w") do io
             write(io, String(r.body))
         end
     end
 
-    JSON.parse(open(f->read(f, String), cache_fname))
+    JSON.parse(open(f -> read(f, String), cache_fname))
 end
 
 function load_league(league)
@@ -67,10 +67,11 @@ end
 
 function all_matches_from_cache()
     files = glob("match-*.json", "cache/")
-    map((fname) -> JSON.parse(open(f->read(f, String), fname)), files)
+    map((fname) -> JSON.parse(open(f -> read(f, String), fname)), files)
 end
 
 struct RiotData
+    matches::DataFrame
     participants::DataFrame
     augments::DataFrame
     traits::DataFrame
@@ -83,22 +84,34 @@ function clean_label(s::String)::String
 end
 
 function parse_match(rd::RiotData, match)
+    match_id = match["metadata"]["match_id"]
+    match_dt = match["info"]["game_datetime"]
+
+    df = DataFrame(
+        MatchID = match_id,
+        MatchDateTime = Dates.unix2datetime(match_dt / 1000),
+        MatchLength = match["info"]["game_length"],
+    )
+    append!(rd.matches, df)
+
     for participant in match["info"]["participants"]
+        puuid = participant["puuid"]
+
         df = DataFrame(
             Placement = participant["placement"],
             Level = participant["level"],
             DamageToPlayers = participant["total_damage_to_players"],
             LastRound = participant["last_round"],
-            MatchID = match["metadata"]["match_id"],
-            PUUID = participant["puuid"],
+            MatchID = match_id,
+            PUUID = puuid,
         )
         append!(rd.participants, df)
 
         augs = map(clean_label, participant["augments"])
         df = DataFrame(
             Augment = augs,
-            MatchID = match["metadata"]["match_id"],
-            PUUID = participant["puuid"],
+            MatchID = match_id,
+            PUUID = puuid,
         )
         append!(rd.augments, df)
 
@@ -109,8 +122,8 @@ function parse_match(rd::RiotData, match)
             Style = map(t -> t["style"], traits),
             TierCurrent = map(t -> t["tier_current"], traits),
             TierTotal = map(t -> t["tier_total"], traits),
-            MatchID = match["metadata"]["match_id"],
-            PUUID = participant["puuid"],
+            MatchID = match_id,
+            PUUID = puuid,
         )
         append!(rd.traits, df)
 
@@ -120,8 +133,8 @@ function parse_match(rd::RiotData, match)
             CharacterName = map(u -> u["name"], units),
             Rarity = map(u -> u["rarity"], units),
             Tier = map(u -> u["tier"], units),
-            MatchID = match["metadata"]["match_id"],
-            PUUID = participant["puuid"],
+            MatchID = match_id,
+            PUUID = puuid,
         )
         append!(rd.units, df)
 
@@ -132,8 +145,8 @@ function parse_match(rd::RiotData, match)
                 CharacterID = clean_label(unit["character_id"]),
                 Item = itemNames,
                 ItemID = items,
-                MatchID = match["metadata"]["match_id"],
-                PUUID = participant["puuid"],
+                MatchID = match_id,
+                PUUID = puuid,
             )
             append!(rd.items, df)
         end
@@ -141,35 +154,39 @@ function parse_match(rd::RiotData, match)
     end
 end
 
-function filter_by_datetime(m, n_days)::Bool
-    dt = m["info"]["game_datetime"]
-    diff = Dates.value((Dates.now() - Dates.unix2datetime(dt / 1000)))
+function filter_by_datetime(r, n_days)::Bool
+    diff = Dates.value((Dates.now() - r.MatchDateTime))
     diff = (div(diff, 1000 * 60 * 60 * 24))
     diff <= n_days
 end
 
-function matches_df(n_days::Int64)::RiotData
+function matches_df()::RiotData
     files = glob("match-*.json", "cache/")
     match_data = map((fname) -> JSON.parse(open(f -> read(f, String), fname)), files)
-    match_data = filter((m)->filter_by_datetime(m, n_days), match_data)
 
-    rd = RiotData(DataFrame(), DataFrame(), DataFrame(), DataFrame(), DataFrame())
+    rd = RiotData(DataFrame(), DataFrame(), DataFrame(), DataFrame(), DataFrame(), DataFrame())
     foreach(m -> parse_match(rd, m), match_data)
 
     rd
 end
 
 function export_all_data(data::RiotData)
-    dfs = Dict("participants" => data.participants, "augments" => data.augments, "traits" => data.traits, "units" => data.units, "items" => data.items)
+    dfs = Dict("matches" => data.matches, "participants" => data.participants, "augments" => data.augments, "traits" => data.traits, "units" => data.units, "items" => data.items)
 
     for (fname, df) in dfs
         CSV.write("data/$(fname).csv", df)
     end
 end
 
-function import_all_data()
-    files = ["participants", "augments", "traits", "units", "items"]
+function import_all_data(n_days::Int64)
+    files = ["matches", "participants", "augments", "traits", "units", "items"]
     dfs = map((f) -> DataFrame(CSV.File("data/$(f).csv")), files)
+    matches_df = first(dfs)
+
+    match_ids = filter((r)->filter_by_datetime(r, n_days), matches_df).MatchID
+
+    dfs = map((df)->filter((r)->r.MatchID in match_ids, df), dfs)
+
     RiotData(dfs...)
 end
 
