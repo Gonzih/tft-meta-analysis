@@ -285,7 +285,11 @@ begin
 end
 
 # ╔═╡ e2107889-4dd2-4035-8408-b87010f033bb
-@bind trait_power FancyOptionPowerSelector(current_traits)
+if current_traits !== missing
+	@bind trait_power FancyOptionPowerSelector(current_traits)
+else
+	waveform
+end
 
 # ╔═╡ 14613643-d5f9-40f6-b1e6-c37c314210a6
 if trait_power !== missing
@@ -302,7 +306,7 @@ else
 end
 
 # ╔═╡ 5141181e-8724-482a-8c8d-abf66bc849dc
-begin
+if trait_power !== missing && rd !== missing
 	cdf = innerjoin(rd.units, rd.traits, rd.participants, on = [:MatchID, :PUUID])
 	trait_filter = Dict(String(k) => v for (k, v) in Dict(pairs(trait_power)))
 	all_champs = unique(rd.units.CharacterID)
@@ -317,6 +321,8 @@ begin
 	md"""
 	  ##### Found $(length(all_champs)) total champions
 	"""
+else
+	waveform
 end
 
 # ╔═╡ 286e7017-e748-4a51-b293-aa4dc8b483ff
