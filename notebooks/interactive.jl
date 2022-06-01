@@ -33,6 +33,26 @@ begin
 	""
 end
 
+# ╔═╡ 7d53d7e1-a85f-4a75-9764-ce186845509f
+begin
+	function icon_for(s, kind=:champ)
+		if kind == :champ
+			"https://rerollcdn.com/characters/Skin/7/$(s).png"
+		elseif kind == :trait
+			"https://rerollcdn.com/icons/$(lowercase(s)).png"
+		end
+	end
+
+	function render_icon(s, kind=:champ)
+		src = icon_for(s; kind=kind))
+		klass = "$(String(kind))_icon icon"
+			
+		@htl("""
+		<img class=$(klass) src=$src />
+		""")
+	end
+end
+
 # ╔═╡ baec4e6a-1500-4fb8-a1a4-fde24a36b944
 begin
 	waveform = @htl("""
@@ -99,9 +119,10 @@ begin
 end
 
 # ╔═╡ 748ebda8-8124-40b2-9a84-fd1d9576214c
-function FancyMultiSelect(options)
+function FancyMultiSelect(options; icon_kind=:champ)
   id = randstring(['0':'9'; 'a':'f'])
   render_id = randstring(['0':'9'; 'a':'f'])
+  icons = Dict(o => icon_for(o, icon_kind) for o in options)
 
   @htl("""
 	<div id=$(id)>  
@@ -152,6 +173,7 @@ function FancyMultiSelect(options)
 			
 			selectorDiv.value = selectorDiv.value || [];
 			const all_options = $(options);	
+  			const icons = $(icons);
 			
 			function render(){
   				const not_selected = all_options.filter((c) => !selectorDiv.value.includes(c));
@@ -177,12 +199,18 @@ function FancyMultiSelect(options)
 			}
 			
 			function renderOpts(opts, klass, cb) {
-				opts.forEach((c) => {
+				opts.forEach((o) => {
 					const a = document.createElement("a");
-					a.innerText = c;
+					a.innerText = o;
 					a.href="#";
 					a.className = klass;
-					a.addEventListener("click", (e) => { cb(c); e.preventDefault() });
+					a.addEventListener("click", (e) => { cb(o); e.preventDefault() });
+  					const icon = icons[o];
+  					if (icon !== undefined) {
+  						const img = document.createElement("img");
+  						img.src = icon;
+  						a.appendChild(img);
+					}
 					renderTarget.appendChild(a);
 				})
 			}
@@ -193,11 +221,11 @@ function FancyMultiSelect(options)
   """)
 end
 
-# ╔═╡ ccb8f312-e129-46ef-b2c3-7f16dedd6434
+# ╔═╡ bbc33aa8-fdcf-41b2-827c-e2e76909f89d
 function FancyOptionPowerSelector(options)
 	return PlutoUI.combine() do Child	
 		inputs = [
-			md""" $(opt): $(
+			md""" $(render_icon(opt, :trait)) $(opt): $(
 				Child(opt, Slider(1:12))
 			)"""
 			
@@ -258,9 +286,10 @@ end
 function render_champ_items(c)
 	items = filter((r)->r.CharacterID == c, rd.items)
 	graph = viz_freq(items.Item; limit = 8)
+	icon = icon_for(c)
 	
 	md"""
-	### $(c)
+	### $(render_icon(icon)) $(c)
 	
 	$(graph)
 	"""
@@ -269,14 +298,18 @@ end
 # ╔═╡ ce9a02c5-8803-4270-8fd8-af84274e7977
 begin
 	all_traits = unique(rd.traits.Trait)
+	icons = map((s)->render_icon(s;kind=:trait), all_traits)
 	md"""
 	  ##### Found $(length(all_traits)) total traits
+
+	  $(icons)
 	"""
+	
 end
 
 # ╔═╡ 3fc35f5b-9f74-47d8-954e-c77de5421146
 begin
-	trait_sel = @bind current_traits FancyMultiSelect(sort(all_traits))
+	trait_sel = @bind current_traits FancyMultiSelect(sort(all_traits); icon_kind=:trait)
 
 	md"""
 	## Select your traits:
@@ -1075,9 +1108,9 @@ uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 
 [[deps.Pluto]]
 deps = ["Base64", "Configurations", "Dates", "Distributed", "FileWatching", "FuzzyCompletions", "HTTP", "HypertextLiteral", "InteractiveUtils", "Logging", "MIMEs", "Markdown", "MsgPack", "Pkg", "PrecompileSignatures", "REPL", "RelocatableFolders", "Sockets", "TOML", "Tables", "UUIDs"]
-git-tree-sha1 = "c2d65c0fbb49b5b316605c3700b1fb2df5a1a969"
+git-tree-sha1 = "838eab766f175014e6f47b4d6672cb7d68b14948"
 uuid = "c3e4b0f8-55cb-11ea-2926-15256bba5781"
-version = "0.19.5"
+version = "0.19.6"
 
 [[deps.PlutoSliderServer]]
 deps = ["AbstractPlutoDingetjes", "Base64", "BetterFileWatching", "Configurations", "Distributed", "FromFile", "Git", "GitHubActions", "HTTP", "Logging", "Pkg", "Pluto", "SHA", "Sockets", "TOML", "TerminalLoggers", "UUIDs"]
@@ -1392,24 +1425,25 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 """
 
 # ╔═╡ Cell order:
-# ╟─056e46de-e041-11ec-24b8-89435398cd34
-# ╟─155b2371-2106-4095-90ab-02de813b8da7
-# ╟─baec4e6a-1500-4fb8-a1a4-fde24a36b944
-# ╟─748ebda8-8124-40b2-9a84-fd1d9576214c
-# ╟─ccb8f312-e129-46ef-b2c3-7f16dedd6434
-# ╟─940338a8-9c7e-41df-96cd-968db4aaa3e8
-# ╟─5844e0af-eed5-4346-90bb-1993faa2552d
-# ╟─fae59dd1-03c4-459b-b7a8-83524a41f0aa
-# ╟─547bb2ab-bdb9-4c6e-8efe-3926f079de71
-# ╟─563f3666-80b8-4b0d-ae79-70e045e91249
-# ╟─a85f6282-f346-482d-a1bd-11b0a027631a
-# ╟─ce9a02c5-8803-4270-8fd8-af84274e7977
-# ╟─3fc35f5b-9f74-47d8-954e-c77de5421146
-# ╟─e2107889-4dd2-4035-8408-b87010f033bb
-# ╟─14613643-d5f9-40f6-b1e6-c37c314210a6
-# ╟─5141181e-8724-482a-8c8d-abf66bc849dc
-# ╟─286e7017-e748-4a51-b293-aa4dc8b483ff
-# ╟─24f310f0-d7d9-4d59-89c1-b536438ec2bc
-# ╟─2f0059d1-e9e9-42af-a027-b5f82f247cbe
+# ╠═056e46de-e041-11ec-24b8-89435398cd34
+# ╠═7d53d7e1-a85f-4a75-9764-ce186845509f
+# ╠═155b2371-2106-4095-90ab-02de813b8da7
+# ╠═baec4e6a-1500-4fb8-a1a4-fde24a36b944
+# ╠═748ebda8-8124-40b2-9a84-fd1d9576214c
+# ╠═bbc33aa8-fdcf-41b2-827c-e2e76909f89d
+# ╠═940338a8-9c7e-41df-96cd-968db4aaa3e8
+# ╠═5844e0af-eed5-4346-90bb-1993faa2552d
+# ╠═fae59dd1-03c4-459b-b7a8-83524a41f0aa
+# ╠═547bb2ab-bdb9-4c6e-8efe-3926f079de71
+# ╠═563f3666-80b8-4b0d-ae79-70e045e91249
+# ╠═a85f6282-f346-482d-a1bd-11b0a027631a
+# ╠═ce9a02c5-8803-4270-8fd8-af84274e7977
+# ╠═3fc35f5b-9f74-47d8-954e-c77de5421146
+# ╠═e2107889-4dd2-4035-8408-b87010f033bb
+# ╠═14613643-d5f9-40f6-b1e6-c37c314210a6
+# ╠═5141181e-8724-482a-8c8d-abf66bc849dc
+# ╠═286e7017-e748-4a51-b293-aa4dc8b483ff
+# ╠═24f310f0-d7d9-4d59-89c1-b536438ec2bc
+# ╠═2f0059d1-e9e9-42af-a027-b5f82f247cbe
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
