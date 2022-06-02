@@ -26,6 +26,8 @@ begin
 	using PlutoUI
 
 	Gadfly.push_theme(:dark)
+	
+	"dependencies"
 end
 
 # ╔═╡ 7bc24ef4-e910-4651-8ca4-2c012b670161
@@ -100,7 +102,13 @@ end
 	width: 32px;
 	height: 32px;
 }
+.centered {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
 </style>
+Styles are here
 """)
 
 # ╔═╡ 8a641b43-8ea3-49c6-ae3c-148542beba07
@@ -110,6 +118,8 @@ begin
 			"https://rerollcdn.com/characters/Skin/7/$(s).png"
 		elseif kind == :trait
 			"https://rerollcdn.com/icons/$(lowercase(s)).png"
+		elseif kind == :item
+			"https://rerollcdn.com/items/$(s).png"
 		end
 	end
 
@@ -118,7 +128,7 @@ begin
 		klass = "$(String(kind))_icon icon"
 			
 		@htl("""
-		<img class=$(klass) src=$src />
+		<img class=$(klass) src=$src alt=$(s) />
 		""")
 	end
 end
@@ -129,6 +139,9 @@ function FancyMultiSelect(options; icon_kind=:champ)
   render_id = randstring(['0':'9'; 'a':'f'])
   icons = Dict(o => icon_for(o, icon_kind) for o in options)
   img_class = "$(String(icon_kind))_icon"
+  if icon_kind == :champ
+	  id = "champion_selector_div"
+  end
 
   @htl("""
 	<div id=$(id)>  
@@ -143,7 +156,7 @@ function FancyMultiSelect(options; icon_kind=:champ)
   				width: 40px;
   				height: 40px;
   				padding: 4px;
-  				border-radius: 10px;
+  				border-radius: 4px;
 			}	
   
   			.rm_link {
@@ -206,6 +219,9 @@ function FancyMultiSelect(options; icon_kind=:champ)
 					renderTarget.appendChild(a);
 				})
 			}
+
+  			selectorDiv.addOption = addOption;
+  			selectorDiv.rmOption = rmOption;
 			
 			render();
 		</script>
@@ -225,23 +241,61 @@ function FancyOptionPowerSelector(options)
 		]
 		
 		md"""
-		  ##### Select
+		  ##### Select power levels
 		  $(inputs)
 		"""
 	end
 end
 
 # ╔═╡ 2054f69b-07b8-4dc4-91dc-cdfed8481b39
-function viz_freq(coll; limit=10)
-	set_default_plot_size(17cm, 1cm*limit)
+begin
+	function viz_freq(coll; limit=10)
+		set_default_plot_size(17cm, 1cm*limit)
+		
+		ft = freqtable(coll)
+		df = DataFrame(Label = names(ft)[1], Freq = ft)
+		sort!(df, [:Freq], rev=true)
 	
-	ft = freqtable(coll)
-	df = DataFrame(Label = names(ft)[1], Freq = ft)
-	sort!(df, [:Freq], rev=true)
+		df = first(df, limit)
+		sort!(df, [:Freq])
+	    plot(df, x=:Freq, y=:Label, Geom.bar(position=:dodge, orientation=:horizontal))
+	end
 
-	df = first(df, limit)
-	sort!(df, [:Freq])
-    plot(df, x=:Freq, y=:Label, Geom.bar(position=:dodge, orientation=:horizontal))
+	function viz_freq_simple(coll; limit=10, icon_kind=:champ)		
+		ft = freqtable(coll)
+		df = DataFrame(Label = names(ft)[1], Freq = ft)
+		sort!(df, [:Freq], rev=true)
+	
+		df = first(df, limit)
+
+		onclick = (s)->""
+
+		if icon_kind == :champ
+			onclick = (s)->"document.getElementById('champion_selector_div').addOption('$(s)');"
+		end
+
+		if nrow(df) > 0
+			max_v = maximum(df.Freq)
+			inputs = [
+				@htl("""
+				<div class="centered" style="margin-bottom:10px;" onclick=$(onclick(r.Label))>
+					$(render_icon(r.Label, icon_kind))
+				</div>
+				<div class="centered" style="margin-bottom:10px;">
+					<progress value=$(r.Freq) max=$(max_v) style='width: 100%' />
+				</div>
+				""")
+				for r in eachrow(df)
+			]
+	
+			@htl("""
+				<div style="display: grid; grid-template-columns: 50px auto;">
+					$(inputs)
+				</div>
+				<hr/>
+			""")
+		end
+	end
 end
 
 # ╔═╡ 3731faa2-4d9f-4d98-b095-781a7c2464c1
@@ -277,7 +331,7 @@ end
 # ╔═╡ 3d0fcdac-8a4b-489e-8940-215c4e0b4c26
 function render_champ_items(c)
 	items = filter((r)->r.CharacterID == c, rd.items)
-	graph = viz_freq(items.Item; limit = 8)
+	graph = viz_freq_simple(items.Item; limit = 8, icon_kind = :item)
 	
 	md"""
 	### $(render_icon(c)) $(c)
@@ -289,14 +343,10 @@ end
 # ╔═╡ 5bbd2c5f-3a89-419f-8936-f063c853fd43
 begin
 	all_traits = filter((t)->!startswith(t, "TFTTutorial"), unique(rd.traits.Trait))
-	icons = map((s)->render_icon(s, :trait), all_traits)
 	
 	md"""
 	  ##### Found $(length(all_traits)) total traits
-
-	  $(icons)
-	"""
-	
+	"""	
 end
 
 # ╔═╡ 14fb0cd0-8a18-458a-b1f9-992ef46108f2
@@ -345,7 +395,6 @@ if trait_power !== missing && rd !== missing
 
 	md"""
 	  ##### Found $(length(all_champs)) total champions
-	  $(map(render_icon, all_champs))
 	"""
 else
 	waveform
@@ -387,12 +436,12 @@ if current_champs !== missing
 		end
 	end
 
-    champ_plot = viz_freq(other_champs; limit = graph_h_limit)
+    champ_plot = viz_freq_simple(other_champs; limit = graph_h_limit)
 	
 	md"""
 	#### Selected champs: $(join(current_champs, ", "))
 	
-	### Popular choices:
+	### Popular champion choices:
 	$(champ_plot)
 	"""
 else
@@ -1114,11 +1163,11 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╔═╡ Cell order:
 # ╟─7d3b92bc-e204-11ec-1da7-f5f3d36f2b35
 # ╟─7bc24ef4-e910-4651-8ca4-2c012b670161
-# ╠═861f00e8-c967-4281-9b12-0b510082580d
+# ╟─861f00e8-c967-4281-9b12-0b510082580d
 # ╟─8a641b43-8ea3-49c6-ae3c-148542beba07
 # ╠═0ae7bdeb-690e-4096-b9f9-13c3a9624ff1
 # ╟─5260fa13-db26-4379-8df1-dd5bdedd3ff3
-# ╟─2054f69b-07b8-4dc4-91dc-cdfed8481b39
+# ╠═2054f69b-07b8-4dc4-91dc-cdfed8481b39
 # ╟─3d0fcdac-8a4b-489e-8940-215c4e0b4c26
 # ╟─3731faa2-4d9f-4d98-b095-781a7c2464c1
 # ╟─3830b19e-3365-4f30-9e93-3304fe5a345b
