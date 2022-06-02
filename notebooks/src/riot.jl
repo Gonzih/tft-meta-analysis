@@ -172,6 +172,9 @@ function matches_df()::RiotData
     rd
 end
 
+df_files = ["matches", "participants", "augments", "traits", "units", "items"]
+data_archive_location = "https://github.com/Gonzih/tft-meta-analysis/raw/main/data.tar.bz2"
+
 function export_all_data(data::RiotData)
     dfs = Dict("matches" => data.matches, "participants" => data.participants, "augments" => data.augments, "traits" => data.traits, "units" => data.units, "items" => data.items)
 
@@ -181,13 +184,12 @@ function export_all_data(data::RiotData)
 end
 
 function import_all_data(n_days::Int64)
-    files = ["matches", "participants", "augments", "traits", "units", "items"]
-    dfs = map((f) -> DataFrame(CSV.File("data/$(f).csv")), files)
+    dfs = map((f) -> DataFrame(CSV.File("data/$(f).csv")), df_files)
     matches_df = first(dfs)
 
-    match_ids = filter((r)->filter_by_datetime(r, n_days), matches_df).MatchID
+    match_ids = filter((r) -> filter_by_datetime(r, n_days), matches_df).MatchID
 
-    dfs = map((df)->filter((r)->r.MatchID in match_ids, df), dfs)
+    dfs = map((df) -> filter((r) -> r.MatchID in match_ids, df), dfs)
 
     RiotData(dfs...)
 end

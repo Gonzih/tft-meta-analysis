@@ -12,7 +12,7 @@ docker-start-pluto-live: build-docker-image
 	docker run $(DOCKER_ARGS) -ti $(LIVE_IMAGE_NAME)
 
 docker-shell: build-docker-image
-	docker run $(DOCKER_ARGS) -ti $(IMAGE_NAME) su -c julia julia
+	docker run $(DOCKER_V_ARGS) -ti $(IMAGE_NAME) su -c julia julia
 
 build-docker-image:
 	docker build -t $(IMAGE_NAME) .
