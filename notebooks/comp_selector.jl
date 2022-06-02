@@ -186,9 +186,9 @@ begin
 		end
 	end
 
-	function icon_for(s, kind=:champ)
+	function icon_for(s, kind=:champ; set="6.5")
 		if kind == :champ
-			"https://rerollcdn.com/characters/Skin/7/$(s).png"
+			"https://rerollcdn.com/characters/Skin/$(set)/$(s).png"
 		elseif kind == :trait
 			"https://rerollcdn.com/icons/$(lowercase(s)).png"
 		elseif kind == :item
