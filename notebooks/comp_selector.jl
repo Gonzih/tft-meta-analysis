@@ -114,6 +114,9 @@ end
 Styles are here
 """)
 
+# ╔═╡ f298ae62-f463-4319-8a1e-65c673b63dd7
+
+
 # ╔═╡ 3731faa2-4d9f-4d98-b095-781a7c2464c1
 module riot include("src/riot.jl") end
 
@@ -234,17 +237,11 @@ function FancyMultiSelect(options; icon_kind=:champ)
   				vertical-align: middle;
   				width: 40px;
   				height: 40px;
-  				padding: 4px;
-  				border-radius: 4px;
 			}	
   
-  			.rm_link {
-  				background-color: #136a25;
-			}
+  			.rm_link {}
   
-  			.add_link {
-  				background-color: #575859;
-			}
+  			.add_link {}
   		</style>
 		
 		<script>
@@ -1515,6 +1512,7 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╟─861f00e8-c967-4281-9b12-0b510082580d
 # ╟─8a641b43-8ea3-49c6-ae3c-148542beba07
 # ╟─0ae7bdeb-690e-4096-b9f9-13c3a9624ff1
+# ╠═f298ae62-f463-4319-8a1e-65c673b63dd7
 # ╟─5260fa13-db26-4379-8df1-dd5bdedd3ff3
 # ╟─2054f69b-07b8-4dc4-91dc-cdfed8481b39
 # ╟─3d0fcdac-8a4b-489e-8940-215c4e0b4c26
