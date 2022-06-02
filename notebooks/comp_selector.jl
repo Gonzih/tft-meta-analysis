@@ -114,9 +114,6 @@ end
 Styles are here
 """)
 
-# ╔═╡ f298ae62-f463-4319-8a1e-65c673b63dd7
-
-
 # ╔═╡ 3731faa2-4d9f-4d98-b095-781a7c2464c1
 module riot include("src/riot.jl") end
 
@@ -189,13 +186,38 @@ begin
 		end
 	end
 
+	capfirstchars = ["KhaZix", "ChoGath"]
+
+	function mapcharname(s)
+		if s in capfirstchars
+			uppercasefirst(lowercase(s))
+		else
+			s
+		end
+	end
+
+	itemmappings = Dict(
+		"Chalice" => "ChaliceofPower",
+		"PowerGauntlet" => "HandofJustice",
+		"RapidFireCannon" => "RapidFirecannon",
+		"Shroud" => "ShroudofStillness",		
+	)
+
+	function mapitemname(s)
+		if s in keys(itemmappings)
+			itemmappings[s]
+		else
+			replace(s, "The" => "the", "Of" => "of")
+		end
+	end
+
 	function icon_for(s, kind=:champ; set="6.5")
 		if kind == :champ
-			"https://rerollcdn.com/characters/Skin/$(set)/$(s).png"
+			"https://rerollcdn.com/characters/Skin/$(set)/$(mapcharname(s)).png"
 		elseif kind == :trait
 			"https://rerollcdn.com/icons/$(lowercase(s)).png"
 		elseif kind == :item
-			"https://rerollcdn.com/items/$(s).png"
+			"https://rerollcdn.com/items/$(mapitemname(s)).png"
 		end
 	end
 
@@ -380,7 +402,7 @@ end
 # ╔═╡ 3d0fcdac-8a4b-489e-8940-215c4e0b4c26
 function render_champ_items(c)
 	items = filter((r)->r.CharacterID == c, rd.items)
-	graph = viz_freq_simple(items.Item; limit = 8, icon_kind = :item)
+	graph = viz_freq_simple(items.Item; limit = 9, icon_kind = :item)
 	
 	md"""
 	### $(render_icon(c)) $(c)
@@ -1510,9 +1532,8 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╟─7d3b92bc-e204-11ec-1da7-f5f3d36f2b35
 # ╟─7bc24ef4-e910-4651-8ca4-2c012b670161
 # ╟─861f00e8-c967-4281-9b12-0b510082580d
-# ╟─8a641b43-8ea3-49c6-ae3c-148542beba07
+# ╠═8a641b43-8ea3-49c6-ae3c-148542beba07
 # ╟─0ae7bdeb-690e-4096-b9f9-13c3a9624ff1
-# ╠═f298ae62-f463-4319-8a1e-65c673b63dd7
 # ╟─5260fa13-db26-4379-8df1-dd5bdedd3ff3
 # ╟─2054f69b-07b8-4dc4-91dc-cdfed8481b39
 # ╟─3d0fcdac-8a4b-489e-8940-215c4e0b4c26
