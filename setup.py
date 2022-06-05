@@ -9,7 +9,7 @@ setuptools.setup(
           'pluto = plutoserver:setup_plutoserver',
       ]
   },
-  install_requires=['jupyter-server-proxy @ git+http://github.com/fonsp/tft-meta-analysis@6439f3f8ffbcae25a93e17eef8ea44eb9b1b20dd'],
+  install_requires=['jupyter-server-proxy @ git+http://github.com/fonsp/jupyter-server-proxy@3a58aa5005f942d0c208eab9a480f6ab171142ef'],
 )
 
 import os
