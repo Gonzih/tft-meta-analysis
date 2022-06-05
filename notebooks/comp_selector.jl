@@ -160,6 +160,7 @@ begin
 		r.CharacterID => r.Rarity
 		for r in eachrow(champ_rarity)
 	)
+	"Champ cost table"
 end
 
 # ╔═╡ 8a641b43-8ea3-49c6-ae3c-148542beba07
@@ -221,15 +222,31 @@ begin
 		end
 	end
 
+	function render_pair_icons(pair)
+		kind=:pair
+		icons = []
+		
+		for s in pair				
+			img = render_icon(s, :trait)
+			push!(icons, img)
+		end
+
+		icons
+	end
+
 	function render_icon(s, kind=:champ)
-		src = icon_for(s, kind)
-		klass = "$(String(kind))_icon icon"
-		color = rarity_color_for(s)
-		style = "border-color: $color"
-			
-		@htl("""
-		<img class=$(klass) src=$(src) alt=$(s) style=$(style) />
-		""")
+		if kind == :pair
+			render_pair_icons(s)
+		else	
+			src = icon_for(s, kind)
+			klass = "$(String(kind))_icon icon"
+			color = rarity_color_for(s)
+			style = "border-color: $color"
+				
+			@htl("""
+			<img class=$(klass) src=$(src) alt=$(s) style=$(style) />
+			""")
+		end
 	end
 end
 
@@ -375,6 +392,13 @@ begin
 			onclick = (s)->"document.getElementById('champion_selector_div').addOption('$(s)');"
 		end
 
+		base_width = 40
+		icon_width = "$(base_width)px"
+		if icon_kind == :pair
+			iwidth = base_width * length(first(coll))
+			icon_width = "$(iwidth)px"
+		end
+
 		if nrow(df) > 0
 			max_v = maximum(df.Freq)
 			inputs = [
@@ -390,7 +414,7 @@ begin
 			]
 	
 			@htl("""
-				<div style="display: grid; grid-template-columns: 50px auto;">
+				<div style="display: grid; grid-template-columns: $(icon_width) auto;">
 					$(inputs)
 				</div>
 				<hr/>
@@ -408,6 +432,34 @@ function render_champ_items(c)
 	### $(render_icon(c)) $(c)
 	
 	$(graph)
+	"""
+end
+
+# ╔═╡ 744599ac-f0b4-404e-8aa7-890196210dcc
+begin
+	comp_limit_f = @bind comp_graph_limit Slider(1:5; default = 2)
+	md"""
+	### Select $(comp_limit_f) traits for comp graph
+	"""
+end
+
+# ╔═╡ 26e9433d-c599-4a83-8a8a-49cc7b31c0b1
+begin
+	sorted_traits = sort(rd.traits, :NumUnits, rev=true)
+	gtdf = groupby(sorted_traits, [:MatchID, :PUUID])
+
+	comp_pairs = []
+
+	for g in gtdf 
+		pair = first(g, comp_graph_limit)
+		push!(comp_pairs, pair.Trait)
+	end
+
+	comp_graph = viz_freq_simple(comp_pairs; icon_kind=:pair)
+
+	md"""
+	## Popular comps
+	$(comp_graph)
 	"""
 end
 
@@ -1535,7 +1587,7 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╟─8a641b43-8ea3-49c6-ae3c-148542beba07
 # ╟─0ae7bdeb-690e-4096-b9f9-13c3a9624ff1
 # ╟─5260fa13-db26-4379-8df1-dd5bdedd3ff3
-# ╟─2054f69b-07b8-4dc4-91dc-cdfed8481b39
+# ╠═2054f69b-07b8-4dc4-91dc-cdfed8481b39
 # ╟─3d0fcdac-8a4b-489e-8940-215c4e0b4c26
 # ╟─3731faa2-4d9f-4d98-b095-781a7c2464c1
 # ╟─3830b19e-3365-4f30-9e93-3304fe5a345b
@@ -1543,6 +1595,8 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╟─19a275ae-6c7b-4301-b5b5-fac45825e621
 # ╟─5bbd2c5f-3a89-419f-8936-f063c853fd43
 # ╟─d89ed438-0339-4c06-b5a9-cc5f78f0cc4b
+# ╟─744599ac-f0b4-404e-8aa7-890196210dcc
+# ╟─26e9433d-c599-4a83-8a8a-49cc7b31c0b1
 # ╟─14fb0cd0-8a18-458a-b1f9-992ef46108f2
 # ╟─9e4f28be-a462-4580-87da-5b9ef34dcd93
 # ╟─7f472eeb-e3d2-4174-b19a-b10e3904e96e
