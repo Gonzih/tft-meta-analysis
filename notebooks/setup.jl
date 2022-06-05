@@ -14,20 +14,12 @@ begin
 	@htl("<a href=$(url) target=_blank>OPEN</a>")
 end
 
-# ╔═╡ a53c5870-76a6-4676-9b36-164ad63757a1
-if !isdir("./repo")
-	run(`git clone https://github.com/Gonzih/tft-meta-analysis.git $(pwd)/repo`)
-end
-
-# ╔═╡ c42e3e8c-e4fb-11ec-0a0f-cd41599b9f46
-module packages include("repo/notebooks/src/pkgs.jl") end
-
 # ╔═╡ 23a101b0-46a8-4c4f-a0f4-8aab9a6c39b3
 module riot include("repo/notebooks/src/riot.jl") end
 
 # ╔═╡ 35fe3d96-057e-43db-9141-4b12c6606887
 if !riot.Riot.is_data_present()
-	run(`cd repo && make unpack-data`)
+	run(`make unpack-data`)
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -60,8 +52,6 @@ version = "0.1.6"
 
 # ╔═╡ Cell order:
 # ╠═d48629d6-386b-4d5d-9458-c0521f472151
-# ╠═a53c5870-76a6-4676-9b36-164ad63757a1
-# ╠═c42e3e8c-e4fb-11ec-0a0f-cd41599b9f46
 # ╠═23a101b0-46a8-4c4f-a0f4-8aab9a6c39b3
 # ╠═35fe3d96-057e-43db-9141-4b12c6606887
 # ╠═60f02ac5-0658-4cdb-ac9c-716a46369fe5
