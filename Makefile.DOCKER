@@ -15,7 +15,7 @@ docker-shell: build-docker-image
 	docker run $(DOCKER_V_ARGS) -ti $(IMAGE_NAME) su -c julia julia
 
 build-docker-image:
-	docker build -t $(IMAGE_NAME) .
+	docker build -f Dockerfile.dev -t $(IMAGE_NAME) .
 	docker build -f Dockerfile.live -t $(LIVE_IMAGE_NAME) .
 
 docker-run-scrape: build-docker-image

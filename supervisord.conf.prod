@@ -3,7 +3,7 @@ nodaemon=true
 
 [program:server]
 directory=/notebooks
-command=julia /notebooks/scripts/server.jl
+command=julia /app/notebooks/scripts/server.jl
 user=julia
 environment=HOME="/home/julia",USER="julia"
 redirect_stderr=true
