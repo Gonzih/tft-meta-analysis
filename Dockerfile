@@ -1,15 +1,16 @@
 FROM ubuntu:20.04
 
+EXPOSE 8888
+WORKDIR /
+
 ARG NB_USER=jovyan
 ARG NB_UID=1000
 ENV USER ${NB_USER}
 ENV NB_UID ${NB_UID}
 ENV HOME /home/${NB_USER}
-
 USER ${NB_USER}
+
 USER root
-EXPOSE 8888
-WORKDIR /
 
 # ==== Install system dependencies ====
 
@@ -41,9 +42,5 @@ RUN chown ${NB_UID} /app -R
 
 USER ${NB_USER}
 RUN julia /app/notebooks/src/pkgs.jl
-
-USER root
-
-USER ${NB_USER}
 WORKDIR /app/notebooks
 CMD julia /app/notebooks/scripts/pluto.jl
