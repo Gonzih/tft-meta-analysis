@@ -32,9 +32,10 @@ RUN useradd --no-log-init --system --uid ${NB_UID} \
 ADD . /app
 USER ${NB_USER}
 RUN julia /app/notebooks/src/pkgs.jl
+RUN cd /app && make unpack-data
 
 WORKDIR /app/notebooks
 
 USER root
-COPY supervisord.conf.pro /etc/supervisor/conf.d/supervisord.conf
+COPY supervisord.conf.prod /etc/supervisor/conf.d/supervisord.conf
 CMD ["/usr/bin/supervisord"]
