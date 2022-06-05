@@ -59,3 +59,4 @@ RUN chown ${NB_UID} ${HOME}/.jupyter -R
 USER ${NB_USER}
 RUN julia /app/notebooks/src/pkgs.jl
 WORKDIR /app/notebooks
+CMD ["julia", "--optimize=0", "-e", "import Pluto; Pluto.run(host=\"0.0.0.0\", port={port}, launch_browser=false, require_secret_for_open_links=false, require_secret_for_access=false)"]
