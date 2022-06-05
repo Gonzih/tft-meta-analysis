@@ -35,9 +35,10 @@ RUN useradd --no-log-init --system --uid ${NB_UID} \
 
 # ========== Install IJulia as application user ==========
 
-ADD . /app
-RUN cd /app && make unpack-data
+ADD ./notebooks /app/notebooks
+ADD ./data.tar.bz2 /app
 RUN chown ${NB_UID} /app -R
+
 USER ${NB_USER}
 RUN julia /app/notebooks/src/pkgs.jl
 
@@ -45,4 +46,4 @@ USER root
 
 USER ${NB_USER}
 WORKDIR /app/notebooks
-CMD ["julia" "/app/notebooks/scripts/pluto.jl"]
+CMD julia /app/notebooks/scripts/pluto.jl
