@@ -2,19 +2,24 @@ FROM ubuntu:20.04
 
 ARG NB_USER=jovyan
 ARG NB_UID=1000
-ARG JULIA_VER=1.7.3
-ARG JULIA_URL=https://julialang-s3.julialang.org/bin/linux/x64/1.7
+ENV USER ${NB_USER}
+ENV NB_UID ${NB_UID}
+ENV HOME /home/${NB_USER}
 
-EXPOSE 8888
+USER ${NB_USER}
 USER root
+EXPOSE 8888
 WORKDIR /
 
 # ==== Install system dependencies ====
 
-RUN apt update && apt upgrade -y && apt install -y \
+RUN apt update && apt install -y \
     curl tar supervisor make
 
 # ========== Install Julia ==========
+
+ARG JULIA_VER=1.7.3
+ARG JULIA_URL=https://julialang-s3.julialang.org/bin/linux/x64/1.7
 
 RUN curl -LO ${JULIA_URL}/julia-${JULIA_VER}-linux-x86_64.tar.gz && \
 	  tar -xf julia-${JULIA_VER}-linux-x86_64.tar.gz && \
