@@ -15,6 +15,20 @@ RUN apt update \
     && apt install -y curl tar supervisor make \
     && apt-get clean
 
+# ==== Install python crap ====
+
+# Install Miniconda
+RUN curl -LO https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
+    bash Miniconda3-latest-Linux-x86_64.sh -p /miniconda -b && \
+    rm Miniconda3-latest-Linux-x86_64.sh
+ENV PATH=/miniconda/bin:${PATH}
+
+# Install Jupyter
+RUN conda update -y conda && \
+    conda install -y -c conda-forge jupyterlab numpy scipy matplotlib jupyter-server-proxy
+RUN mkdir /.local && \
+    chown ${NB_UID} /.local
+
 # ========== Install Julia ==========
 
 ARG JULIA_VER=1.7.3
@@ -24,20 +38,22 @@ RUN curl -LO ${JULIA_URL}/julia-${JULIA_VER}-linux-x86_64.tar.gz && \
 	  tar -xf julia-${JULIA_VER}-linux-x86_64.tar.gz && \
 	  rm -rf julia-${JULIA_VER}-linux-x86_64.tar.gz && \
 	  ln -s /julia-${JULIA_VER}/bin/julia /usr/local/bin/julia
-RUN mkdir /.julia && chown ${NB_UID} /.julia
+RUN mkdir ${HOME}/.julia && chown ${NB_UID} ${HOME}/.julia
 
 # ========== Add application user ==========
 
 RUN useradd --no-log-init --system --uid ${NB_UID} \
 	  --create-home --shell /bin/bash ${NB_USER}
+RUN chown ${NB_UID} /home/${NB_USER} -R
 
 # ========== Install IJulia as application user ==========
 
 ADD ./notebooks /app/notebooks
 ADD ./data.tar.bz2 /app
 RUN chown ${NB_UID} /app -R
+ADD jupyter_notebook_config.py ${HOME}/.jupyter/jupyter_notebook_config.py
+RUN chown ${NB_UID} ${HOME}/.jupyter -R
 
 USER ${NB_USER}
 RUN julia /app/notebooks/src/pkgs.jl
 WORKDIR /app/notebooks
-CMD julia /app/notebooks/scripts/pluto.jl
