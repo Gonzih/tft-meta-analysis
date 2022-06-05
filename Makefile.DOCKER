@@ -6,10 +6,10 @@ DOCKER_PORT_ARGS := -p 8888:8888 -p 1234:1234 -p 2345:2345
 DOCKER_V_ARGS := --gpus all -v $(shell pwd)/notebooks:/notebooks --env-file ./.env
 DOCKER_ARGS := $(DOCKER_PORT_ARGS) $(DOCKER_V_ARGS)
 
-docker-start: build-docker-image
+docker-run: build-docker-image
 	docker run $(DOCKER_ARGS) -ti $(IMAGE_NAME)
 
-docker-start-pluto-live: build-docker-image
+docker-run-pluto-live: build-docker-image
 	docker run $(DOCKER_ARGS) -ti $(LIVE_IMAGE_NAME)
 
 docker-shell: build-docker-image
@@ -21,6 +21,9 @@ build-docker-image:
 
 build-public-image:
 	docker build -f Dockerfile -t $(DEPLOY_IMAGE_NAME) .
+
+docker-run-public: build-public-image
+	docker run $(DOCKER_PORT_ARGS) -ti $(DEPLOY_IMAGE_NAME)
 
 docker-run-scrape: build-docker-image
 	docker run $(DOCKER_V_ARGS) -ti $(IMAGE_NAME) su -c "julia /notebooks/scripts/scrape.jl" julia

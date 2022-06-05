@@ -12,7 +12,7 @@ WORKDIR /
 # ==== Install system dependencies ====
 
 RUN apt update && apt upgrade -y && apt install -y \
-    curl tar supervisor
+    curl tar supervisor make
 
 # ========== Install Julia ==========
 
