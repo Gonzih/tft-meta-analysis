@@ -10,7 +10,19 @@ using DataFrames
 using CSV
 import Dates
 
-export load_league, load_summoner, load_matches_for, load_match, scrape_match, scrape_summoner, scrape_league, all_matches_from_cache, matches_df, export_all_data, import_all_data
+export load_league,
+    load_summoner,
+    load_matches_for,
+    load_match,
+    scrape_match,
+    scrape_summoner,
+    scrape_league,
+    all_matches_from_cache,
+    matches_df,
+    export_all_data,
+    import_all_data,
+    is_data_present,
+    download_data
 
 function riot_get(routing, path; cache_key = "get", sleep_duration = 1)
     url = "https://$(routing).api.riotgames.com/$(path)"
@@ -193,5 +205,11 @@ function import_all_data(n_days::Int64)
 
     RiotData(dfs...)
 end
+
+function is_data_present()
+    all(f -> isfile("data/$(f).csv"), df_files)
+end
+
+function download_data() end
 
 end
