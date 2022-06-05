@@ -13,8 +13,9 @@ WORKDIR /
 
 # ==== Install system dependencies ====
 
-RUN apt update && apt install -y \
-    curl tar supervisor make
+RUN apt update \
+    && apt install -y curl tar supervisor make \
+    && apt-get clean
 
 # ========== Install Julia ==========
 
@@ -41,5 +42,7 @@ USER ${NB_USER}
 RUN julia /app/notebooks/src/pkgs.jl
 
 USER root
-COPY supervisord.conf.prod /etc/supervisor/conf.d/supervisord.conf
-CMD ["/usr/bin/supervisord"]
+
+USER ${NB_USER}
+WORKDIR /app/notebooks
+CMD ["julia" "/app/notebooks/scripts/pluto.jl"]

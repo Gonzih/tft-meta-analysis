@@ -2,10 +2,10 @@
 nodaemon=true
 
 [program:server]
-directory=/app/notebooks
-command=julia /app/notebooks/scripts/server.jl
-user=jovyan
-environment=HOME="/home/jovyan",USER="jovyan"
+directory=/notebooks
+command=julia /notebooks/scripts/server.jl
+user=julia
+environment=HOME="/home/julia",USER="julia"
 redirect_stderr=true
 stdout_logfile=/dev/fd/1
 stdout_logfile_maxbytes=0
