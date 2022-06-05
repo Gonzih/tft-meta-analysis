@@ -12,7 +12,7 @@ ENV HOME /home/${NB_USER}
 # ==== Install system dependencies ====
 
 RUN apt update \
-    && apt install -y curl tar supervisor make \
+    && apt install -y curl tar supervisor make git \
     && apt-get clean
 
 # ==== Install python crap ====
@@ -25,7 +25,9 @@ ENV PATH=/miniconda/bin:${PATH}
 
 # Install Jupyter
 RUN conda update -y conda && \
-    conda install -y -c conda-forge jupyterlab numpy scipy matplotlib jupyter-server-proxy
+    conda install -y -c conda-forge jupyterlab numpy scipy matplotlib pip git && \
+    pip install 'jupyter-server-proxy @ git+http://github.com/fonsp/jupyter-server-proxy@3a58aa5005f942d0c208eab9a480f6ab171142ef'
+    # jupyter-server-proxy
 RUN mkdir /.local && \
     chown ${NB_UID} /.local
 
