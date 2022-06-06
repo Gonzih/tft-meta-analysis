@@ -9,7 +9,6 @@
 ## Docker
 
 ```
-docker pull gonzih/tft.jl
 docker run -p 8888:8888 gonzih/tft.jl
 ```
 
