@@ -1,6 +1,6 @@
 IMAGE_NAME := docker-julia-jupyter
 LIVE_IMAGE_NAME := docker-pluto-live
-DEPLOY_IMAGE_NAME := docker-pluto-deploy
+PUBLIC_IMAGE_NAME := gonzih/tft.jl
 
 DOCKER_PORT_ARGS := -p 8888:8888 -p 1234:1234 -p 2345:2345
 DOCKER_V_ARGS := --gpus all -v $(shell pwd)/notebooks:/notebooks --env-file ./.env
@@ -20,10 +20,13 @@ build-docker-image:
 	docker build -f Dockerfile.live -t $(LIVE_IMAGE_NAME) .
 
 build-public-image:
-	docker build -f Dockerfile -t $(DEPLOY_IMAGE_NAME) .
+	docker build -f Dockerfile -t $(PUBLIC_IMAGE_NAME) .
 
 docker-run-public: build-public-image
-	docker run $(DOCKER_PORT_ARGS) -ti $(DEPLOY_IMAGE_NAME)
+	docker run $(DOCKER_PORT_ARGS) -ti $(PUBLIC_IMAGE_NAME)
+
+docker-push-public: build-public-image
+	docker push $(PUBLIC_IMAGE_NAME)
 
 docker-run-scrape: build-docker-image
 	docker run $(DOCKER_V_ARGS) -ti $(IMAGE_NAME) su -c "julia /notebooks/scripts/scrape.jl" julia
