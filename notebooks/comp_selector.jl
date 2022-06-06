@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.5
+# v0.19.8
 
 using Markdown
 using InteractiveUtils
@@ -169,9 +169,9 @@ begin
 		if rar == 0
 			"#213042" #gray
 		elseif rar == 1
-			"#12407c" #blue
-		elseif rar == 2
 			"#156831" #green
+		elseif rar == 2
+			"#12407c" #blue
 		elseif rar == 3
 			"#893088" #purple
 		elseif rar == 5
@@ -1264,10 +1264,10 @@ deps = ["Artifacts", "Dates", "Downloads", "LibGit2", "Libdl", "Logging", "Markd
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 
 [[deps.Pluto]]
-deps = ["Base64", "Configurations", "Dates", "Distributed", "FileWatching", "FuzzyCompletions", "HTTP", "HypertextLiteral", "InteractiveUtils", "Logging", "MIMEs", "Markdown", "MsgPack", "Pkg", "PrecompileSignatures", "REPL", "RelocatableFolders", "Sockets", "TOML", "Tables", "UUIDs"]
-git-tree-sha1 = "838eab766f175014e6f47b4d6672cb7d68b14948"
+deps = ["Base64", "Configurations", "Dates", "Distributed", "FileWatching", "FuzzyCompletions", "HTTP", "HypertextLiteral", "InteractiveUtils", "Logging", "MIMEs", "Markdown", "MsgPack", "Pkg", "PrecompileSignatures", "REPL", "RelocatableFolders", "Sockets", "TOML", "Tables", "URIs", "UUIDs"]
+git-tree-sha1 = "1c340815f709cb59831ada9f6b273ebd56863177"
 uuid = "c3e4b0f8-55cb-11ea-2926-15256bba5781"
-version = "0.19.6"
+version = "0.19.8"
 
 [[deps.PlutoSliderServer]]
 deps = ["AbstractPlutoDingetjes", "Base64", "BetterFileWatching", "Configurations", "Distributed", "FromFile", "Git", "GitHubActions", "HTTP", "Logging", "Pkg", "Pluto", "SHA", "Sockets", "TOML", "TerminalLoggers", "UUIDs"]
