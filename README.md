@@ -3,3 +3,19 @@
 # TFT Match history analysis
 
 ![Demo](screenshots/demo2.png)
+
+# Running
+
+## Docker
+
+```
+docker pull gonzih/tft.jl
+docker run -p 8888:8888 gonzih/tft.jl
+```
+
+After doing this you should be able to access UI via http://localhost:8888/open?path=comp_selector.jl
+
+# Powered by 
+
+* [Pluto.jl](https://github.com/fonsp/Pluto.jl)
+* [Julia lang](https://julialang.org/)
