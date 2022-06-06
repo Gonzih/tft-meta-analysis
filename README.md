@@ -2,4 +2,4 @@
 
 # TFT Match history analysis
 
-![Demo](screenshots/demo.png)
+![Demo](screenshots/demo2.png)
