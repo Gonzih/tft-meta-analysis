@@ -1,8 +1,8 @@
 clear-cache:
-	cd notebooks/cache && rm get-*.json
+	cd notebooks/cache && rm -f get-*.json
 
 clear-data:
-	cd notebooks/data && rm *.csv
+	cd notebooks/data && rm -f *.csv
 
 pack-cache:
 	tar cvjf cache.tar.bz2 notebooks/cache
