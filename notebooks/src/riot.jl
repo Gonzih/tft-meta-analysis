@@ -51,7 +51,7 @@ function load_summoner(id)
 end
 
 function load_matches_for(puuid)
-    riot_get("americas", "tft/match/v1/matches/by-puuid/$(puuid)/ids"; sleep_duration = 2)
+    riot_get("americas", "tft/match/v1/matches/by-puuid/$(puuid)/ids"; sleep_duration = 1)
 end
 
 function load_match(id)
