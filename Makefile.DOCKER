@@ -5,7 +5,7 @@ PUBLIC_IMAGE_NAME := gonzih/tft.jl
 DOCKER_PORT_ARGS := -p 8888:8888 -p 1234:1234 -p 2345:2345
 DOCKER_V_ARGS := --gpus all -v $(shell pwd)/notebooks:/notebooks --env-file ./.env
 DOCKER_ARGS := $(DOCKER_PORT_ARGS) $(DOCKER_V_ARGS)
-DOCKER_TAG := 6.5
+DOCKER_TAG := 7
 
 docker-run: build-docker-image
 	docker run $(DOCKER_ARGS) -ti $(IMAGE_NAME)
