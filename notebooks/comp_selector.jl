@@ -217,7 +217,7 @@ begin
 		end
 	end
 
-	function icon_for(s, kind=:champ; set="6.5")
+	function icon_for(s, kind=:champ; set="7")
 		if kind == :champ
 			"https://rerollcdn.com/characters/Skin/$(set)/$(mapcharname(s)).png"
 		elseif kind == :trait
