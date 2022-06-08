@@ -36,4 +36,4 @@ docker-run-scrape: build-docker-image
 docker-run-export: build-docker-image
 	docker run $(DOCKER_V_ARGS) -ti $(IMAGE_NAME) su -c "julia /notebooks/scripts/export.jl" julia
 
-scrape-build-ship: clear-cache docker-run-scrape docker-run-export pack-cache pack-data docker-push-public
+scrape-all: clear-cache docker-run-scrape docker-run-export pack-cache pack-data
