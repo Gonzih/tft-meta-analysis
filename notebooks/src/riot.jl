@@ -94,7 +94,17 @@ struct RiotData
 end
 
 function clean_label(s::String)::String
-    replace(s, "TFT6_Augment_" => "", "TFT5_" => "", "TFT6_" => "", "TFT_Item_" => "", "Set6_" => "", "TFT6b_" => "", "Item_" => "", "Item" => "")
+    replace(
+        s,
+        "TFT4_" => "",
+        "TFT5_" => "",
+        "TFT6_Augment_" => "",
+        "TFT_Item_" => "",
+        "Item_" => "",
+        "Item" => "",
+        "Set7_" => "",
+        "TFT7_" => "",
+    )
 end
 
 function parse_match(rd::RiotData, match)
