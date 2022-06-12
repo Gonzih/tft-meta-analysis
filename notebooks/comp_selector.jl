@@ -471,6 +471,25 @@ function render_champ_items(c)
 	"""
 end
 
+# ╔═╡ 5069a831-7a20-4534-83ba-095212ebdef8
+begin
+	items_limit_f = @bind items_graph_limit Slider(5:50; default = 10)
+	md"""
+	### Show $(items_limit_f) popular items
+	"""
+end
+
+# ╔═╡ bf9b68cd-5e0a-4d9f-9486-a8a09e5adb58
+begin
+	items_viz = viz_freq_simple(rd.items.Item; limit=items_graph_limit, icon_kind=:item)
+	
+	
+	md"""
+	## Popular $(items_graph_limit) items
+	$(items_viz)
+	"""
+end
+
 # ╔═╡ 744599ac-f0b4-404e-8aa7-890196210dcc
 begin
 	comp_limit_f = @bind comp_graph_limit Slider(1:5; default = 2)
@@ -554,25 +573,6 @@ else
 	waveform
 end
 
-# ╔═╡ 5069a831-7a20-4534-83ba-095212ebdef8
-begin
-	items_limit_f = @bind items_graph_limit Slider(5:50; default = 10)
-	md"""
-	### Show $(items_limit_f) popular items
-	"""
-end
-
-# ╔═╡ bf9b68cd-5e0a-4d9f-9486-a8a09e5adb58
-begin
-	items_viz = viz_freq_simple(rd.items.Item; limit=items_graph_limit, icon_kind=:item)
-	
-	
-	md"""
-	## Popular $(items_graph_limit) items
-	$(items_viz)
-	"""
-end
-
 # ╔═╡ 45130875-f0a3-4c33-93b2-fe93d8397c2e
 begin
 	champ_sel = @bind current_champs FancyMultiSelect(sort(all_champs))
@@ -615,7 +615,7 @@ if current_champs !== missing
 	#### Selected champs:
 	$(map(render_icon, current_champs))
 	
-	### Popular champion choices:
+	### $(graph_h_limit) Popular champion choices:
 	$(champ_plot)
 	"""
 else
