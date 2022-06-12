@@ -554,6 +554,7 @@ if trait_power !== missing &&
 	rd !== missing
 	
 	cdf = innerjoin(rd.units, rd.traits, rd.participants, on = [:MatchID, :PUUID])
+	
 	trait_filter = Dict(String(k) => v for (k, v) in Dict(pairs(trait_power)))
 	all_champs = unique(rd.units.CharacterID)
 	if length(trait_filter) > 0
@@ -565,6 +566,7 @@ if trait_power !== missing &&
 	end
 
 	all_champs = filter((c) -> c != "TrainerDragon", all_champs)
+	all_champs = sort(all_champs, by=(c)->champ_cost[c])
 
 	md"""
 	  ##### Found $(length(all_champs)) total champions
@@ -575,7 +577,7 @@ end
 
 # ╔═╡ 45130875-f0a3-4c33-93b2-fe93d8397c2e
 begin
-	champ_sel = @bind current_champs FancyMultiSelect(sort(all_champs))
+	champ_sel = @bind current_champs FancyMultiSelect(all_champs)
 	limit_slider = @bind graph_h_limit Slider(5:100;default=10)
 
 	md"""
@@ -1654,7 +1656,7 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╟─64954f9d-8540-46fb-b9ac-7618f6c683b1
 # ╟─19a275ae-6c7b-4301-b5b5-fac45825e621
 # ╟─5bbd2c5f-3a89-419f-8936-f063c853fd43
-# ╟─d89ed438-0339-4c06-b5a9-cc5f78f0cc4b
+# ╠═d89ed438-0339-4c06-b5a9-cc5f78f0cc4b
 # ╟─5069a831-7a20-4534-83ba-095212ebdef8
 # ╟─bf9b68cd-5e0a-4d9f-9486-a8a09e5adb58
 # ╟─744599ac-f0b4-404e-8aa7-890196210dcc
