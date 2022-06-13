@@ -30,71 +30,6 @@ begin
 	"dependencies"
 end
 
-# ╔═╡ 7bc24ef4-e910-4651-8ca4-2c012b670161
-begin
-	waveform = @htl("""
-	<style>
-	.waveform {
-	  --uib-size: 40px;
-	  --uib-speed: 1s;
-	  --uib-color: white;
-	  --uib-line-weight: 3.5px;
-	
-	  display: flex;
-	  flex-flow: row nowrap;
-	  align-items: center;
-	  justify-content: space-between;
-	  width: var(--uib-size);
-	  height: calc(var(--uib-size) * 0.9);
-	}
-	
-	.waveform__bar {
-	  width: var(--uib-line-weight);
-	  height: 100%;
-	  background-color: var(--uib-color);
-	}
-	
-	.waveform__bar:nth-child(1) {
-	  animation: grow var(--uib-speed) ease-in-out
-	    calc(var(--uib-speed) * -0.45) infinite;
-	}
-	
-	.waveform__bar:nth-child(2) {
-	  animation: grow var(--uib-speed) ease-in-out
-	    calc(var(--uib-speed) * -0.3) infinite;
-	}
-	
-	.waveform__bar:nth-child(3) {
-	  animation: grow var(--uib-speed) ease-in-out
-	    calc(var(--uib-speed) * -0.15) infinite;
-	}
-	
-	.waveform__bar:nth-child(4) {
-	  animation: grow var(--uib-speed) ease-in-out infinite;
-	}
-	
-	@keyframes grow {
-	  0%,
-	  100% {
-	    transform: scaleY(0.3);
-	  }
-	
-	  50% {
-	    transform: scaleY(1);
-	  }
-	}
-	</style>
-	<div class="waveform">
-	  <div class="waveform__bar"></div>
-	  <div class="waveform__bar"></div>
-	  <div class="waveform__bar"></div>
-	  <div class="waveform__bar"></div>
-	</div>
-	""")
-	
-	"waveform icon"
-end
-
 # ╔═╡ 861f00e8-c967-4281-9b12-0b510082580d
 @htl("""
 <style>
@@ -116,6 +51,15 @@ Styles are here
 
 # ╔═╡ 3731faa2-4d9f-4d98-b095-781a7c2464c1
 module riot include("src/riot.jl") end
+
+# ╔═╡ 456cc811-c813-4258-9dc3-18a0e8a7ae8a
+module viz include("src/viz.jl") end
+
+# ╔═╡ 987ddc96-f47f-4244-8e93-696b9acd4a07
+begin
+	waveform = viz.Viz.waveform
+	md"waveform"
+end
 
 # ╔═╡ 3830b19e-3365-4f30-9e93-3304fe5a345b
 begin
@@ -168,309 +112,6 @@ begin
 	md"Champ cost table"
 end
 
-# ╔═╡ 8a641b43-8ea3-49c6-ae3c-148542beba07
-begin
-	function rarity_color(rar)
-		if rar == 0
-			"#213042" #gray
-		elseif rar == 1
-			"#156831" #green
-		elseif rar == 2
-			"#12407c" #blue
-		elseif rar == 3 || rar == 4
-			"#893088" #purple
-		elseif rar == 5 || rar == 6
-			"#b89d27" #gold
-		end
-	end
-
-	function rarity_color_for(id, kind=:champ)
-		if id in keys(champ_cost) && kind == :champ
-			rarity_color(champ_cost[id])
-		else
-			"rgba(255, 255, 255, 0)"
-		end
-	end
-
-	capfirstchars = ["KhaZix", "ChoGath"]
-
-	charmappings = Dict(
-		"DragonGreen" => "ShiOhYu",
-		"DragonPurple" => "Syfen",
-		"DragonGold" => "Idas",
-		"DragonBlue" => "Daeja",
-		"TrainerDragon" => "Nomsy",		
-	)
-
-	function mapcharname(s)
-		if s in capfirstchars
-			uppercasefirst(lowercase(s))
-		elseif s in keys(charmappings)
-			charmappings[s]
-		else
-			s
-		end
-	end
-
-	itemmappings = Dict(
-		"Chalice" => "ChaliceofPower",
-		"PowerGauntlet" => "HandofJustice",
-		"RapidFireCannon" => "RapidFirecannon",
-		"Shroud" => "ShroudofStillness",
-		"SeraphsEmbrace" => "BlueBuff",
-		"GuardianAngel" => "TitansResolve",
-		"TitanicHydra" => "ZzRotPortal",
-		"ForceOfNature" => "TacticiansCrown",
-		"RedBuff" => "SunfireCape",
-		"MadredsBloodrazor" => "GiantSlayer",
-		"UnstableConcoction" => "BansheesClaw", # not sure about this one, might be the edge of night
-	)
-
-	function mapitemname(s)
-		if s in keys(itemmappings)
-			itemmappings[s]
-		else
-			replace(s, "The" => "the", "Of" => "of")
-		end
-	end
-
-	traitmappings = Dict(
-		"spellthief" => "spell-thief",
-	)
-
-	function maptraitname(s)
-		s = lowercase(s)
-		
-		if s in keys(traitmappings)
-			traitmappings[s]
-		else
-			s
-		end
-	end
-
-	function icon_for(s, kind=:champ; set="7")
-		if kind == :champ
-			"https://rerollcdn.com/characters/Skin/$(set)/$(mapcharname(s)).png"
-		elseif kind == :trait
-			"https://rerollcdn.com/icons/$(maptraitname(s)).png"
-		elseif kind == :item
-			"https://rerollcdn.com/items/$(mapitemname(s)).png"
-		end
-	end
-
-	function render_pair_icons(pair)
-		kind=:pair
-		icons = []
-		
-		for s in pair				
-			img = render_icon(s, :trait)
-			push!(icons, img)
-		end
-
-		icons
-	end
-
-	function render_icon(s, kind=:champ)
-		if kind == :pair
-			render_pair_icons(s)
-		else	
-			src = icon_for(s, kind)
-			klass = "$(String(kind))_icon icon"
-			color = rarity_color_for(s)
-			style = "border-color: $color"
-				
-			@htl("""
-			<img class=$(klass) src=$(src) alt=$(s) style=$(style) />
-			""")
-		end
-	end
-end
-
-# ╔═╡ 0ae7bdeb-690e-4096-b9f9-13c3a9624ff1
-function FancyMultiSelect(options; icon_kind=:champ)
-	id = randstring(['0':'9'; 'a':'f'])
-	render_id = randstring(['0':'9'; 'a':'f'])
-	icons = Dict(o => icon_for(o, icon_kind) for o in options)
-	img_class = "$(String(icon_kind))_icon"
-	if icon_kind == :champ
-	    id = "champion_selector_div"
-	end
-	opt_colors = Dict(
-		o => rarity_color_for(o, icon_kind)
-		for o in options
-	)
-	
-	@htl("""
-	<div id=$(id)>  
-		<div id=$(render_id)></div>
-
-  		<style>
-  			.option_link {
-  				display: inline-block;
-  				margin: 5px;
-  				text-decoration: none;
-  				vertical-align: middle;
-  				width: 40px;
-  				height: 40px;
-			}	
-  
-  			.rm_link {}
-  
-  			.add_link {}
-  		</style>
-		
-		<script>
-			console.log(this);
-			const selectorDiv = document.getElementById($(id));
-			const renderTarget = document.getElementById($(render_id));
-			
-			selectorDiv.value = selectorDiv.value || [];
-			const all_options = $(options);	
-  			const icons = $(icons);
-			const colors = $(opt_colors);
-			
-			function render(){
-  				const not_selected = all_options.filter((c) => !selectorDiv.value.includes(c));
-  
-				renderTarget.innerHTML = '';
-				renderOpts(selectorDiv.value, "option_link rm_link", rmOption);
-				renderTarget.appendChild(document.createElement("hr"));
-				renderOpts(not_selected, "option_link add_link", addOption);
-			}
-			
-			function addOption(opt) {
-				console.log("Adding", opt);
-				selectorDiv.value.push(opt);
-				selectorDiv.dispatchEvent(new Event('input'));
-				render();
-			}
-			
-			function rmOption(opt) {
-				console.log("Removing", opt);
-				selectorDiv.value = selectorDiv.value.filter((o) => o != opt);
-				selectorDiv.dispatchEvent(new Event('input'));
-				render();
-			}
-			
-			function renderOpts(opts, klass, cb) {
-				opts.forEach((o) => {
-					const a = document.createElement("a");
-					a.href="#";
-  					a.title = o;
-					a.className = klass;
-					a.addEventListener("click", (e) => { cb(o); e.preventDefault() });
-  					const icon = icons[o];
-	                const color = colors[o];
-  					if (icon !== undefined) {
-  						const img = document.createElement("img");
-  						img.src = icon;
-  						img.className = "icon " + $(img_class)
-  						img.alt = o;
-						img.style.borderColor = color;
-  						a.appendChild(img);
-					}
-
-					renderTarget.appendChild(a);
-				})
-			}
-
-  			selectorDiv.addOption = addOption;
-  			selectorDiv.rmOption = rmOption;
-			
-			render();
-		</script>
-	</div>
-  """)
-end
-
-# ╔═╡ 5260fa13-db26-4379-8df1-dd5bdedd3ff3
-function FancyOptionPowerSelector(options)
-	return PlutoUI.combine() do Child	
-		inputs = [
-			md""" $(render_icon(opt, :trait)) $(
-				Child(opt, Slider(1:12))
-			)"""
-			
-			for opt in options
-		]
-		
-		md"""
-		  ##### Select power levels
-		  $(inputs)
-		"""
-	end
-end
-
-# ╔═╡ 2054f69b-07b8-4dc4-91dc-cdfed8481b39
-begin
-	function viz_freq(coll; limit=10)
-		set_default_plot_size(17cm, 1cm*limit)
-		
-		ft = freqtable(coll)
-		df = DataFrame(Label = names(ft)[1], Freq = ft)
-		sort!(df, [:Freq], rev=true)
-	
-		df = first(df, limit)
-		sort!(df, [:Freq])
-	    plot(df, x=:Freq, y=:Label, Geom.bar(position=:dodge, orientation=:horizontal))
-	end
-
-	function viz_freq_simple(coll; limit=10, icon_kind=:champ)		
-		ft = freqtable(coll)
-		df = DataFrame(Label = names(ft)[1], Freq = ft)
-		sort!(df, [:Freq], rev=true)
-	
-		df = first(df, limit)
-
-		onclick = (s)->""
-
-		if icon_kind == :champ
-			onclick = (s)->"document.getElementById('champion_selector_div').addOption('$(s)');"
-		end
-
-		base_width = 40
-		icon_width = "$(base_width)px"
-		if icon_kind == :pair
-			iwidth = base_width * length(first(coll))
-			icon_width = "$(iwidth)px"
-		end
-
-		if nrow(df) > 0
-			max_v = maximum(df.Freq)
-			inputs = [
-				@htl("""
-				<div class="centered" style="margin-bottom:10px; cursor: pointer;" onclick=$(onclick(r.Label))>
-					$(render_icon(r.Label, icon_kind))
-				</div>
-				<div class="centered" style="margin-bottom:10px;">
-					<progress value=$(r.Freq) max=$(max_v) style='width: 100%' />
-				</div>
-				""")
-				for r in eachrow(df)
-			]
-	
-			@htl("""
-				<div style="display: grid; grid-template-columns: $(icon_width) auto;">
-					$(inputs)
-				</div>
-				<hr/>
-			""")
-		end
-	end
-end
-
-# ╔═╡ 3d0fcdac-8a4b-489e-8940-215c4e0b4c26
-function render_champ_items(c)
-	items = filter((r)->r.CharacterID == c, rd.items)
-	graph = viz_freq_simple(items.Item; limit = 9, icon_kind = :item)
-	
-	md"""
-	### $(render_icon(c)) $(c)
-	
-	$(graph)
-	"""
-end
-
 # ╔═╡ 5069a831-7a20-4534-83ba-095212ebdef8
 begin
 	items_limit_f = @bind items_graph_limit Slider(5:50; default = 10)
@@ -481,7 +122,7 @@ end
 
 # ╔═╡ bf9b68cd-5e0a-4d9f-9486-a8a09e5adb58
 begin
-	items_viz = viz_freq_simple(rd.items.Item; limit=items_graph_limit, icon_kind=:item)
+	items_viz = viz.Viz.freq_simple(rd.items.Item; limit=items_graph_limit, icon_kind=:item)
 	
 	
 	md"""
@@ -510,7 +151,7 @@ begin
 		push!(comp_pairs, pair.Trait)
 	end
 
-	comp_graph = viz_freq_simple(comp_pairs; icon_kind=:pair)
+	comp_graph = viz.Viz.freq_simple(comp_pairs; icon_kind=:pair)
 
 	md"""
 	## Popular comps
@@ -520,7 +161,7 @@ end
 
 # ╔═╡ 14fb0cd0-8a18-458a-b1f9-992ef46108f2
 begin
-	trait_sel = @bind current_traits FancyMultiSelect(sort(all_traits); icon_kind=:trait)
+	trait_sel = @bind current_traits viz.Viz.FancyMultiSelect(sort(all_traits); icon_kind=:trait)
 
 	md"""
 	## Select your traits:
@@ -530,7 +171,7 @@ end
 
 # ╔═╡ 9e4f28be-a462-4580-87da-5b9ef34dcd93
 if current_traits !== missing
-	@bind trait_power FancyOptionPowerSelector(current_traits)
+	@bind trait_power viz.Viz.FancyOptionPowerSelector(current_traits)
 else
 	waveform
 end
@@ -538,7 +179,7 @@ end
 # ╔═╡ 7f472eeb-e3d2-4174-b19a-b10e3904e96e
 if trait_power !== missing
 	trait_power_labels = [
-		md"##### $(render_icon(String(t), :trait)) $(String(t)) - $(p)"
+		md"##### $(viz.Viz.render_icon(String(t), :trait)) $(String(t)) - $(p)"
 		for (t, p) in Dict(pairs(trait_power))
 	]
 	md"""
@@ -577,7 +218,7 @@ end
 
 # ╔═╡ 45130875-f0a3-4c33-93b2-fe93d8397c2e
 begin
-	champ_sel = @bind current_champs FancyMultiSelect(all_champs)
+	champ_sel = @bind current_champs viz.Viz.FancyMultiSelect(all_champs, champ_cost_dict = champ_cost)
 	limit_slider = @bind graph_h_limit Slider(5:100;default=10)
 
 	md"""
@@ -611,11 +252,11 @@ if current_champs !== missing
 		end
 	end
 
-    champ_plot = viz_freq_simple(other_champs; limit = graph_h_limit)
+    champ_plot = viz.Viz.freq_simple(other_champs; limit = graph_h_limit)
 	
 	md"""
 	#### Selected champs:
-	$(map(render_icon, current_champs))
+	$(map(viz.Viz.render_icon, current_champs))
 	
 	### $(graph_h_limit) Popular champion choices:
 	$(champ_plot)
@@ -626,10 +267,7 @@ end
 
 # ╔═╡ 61fdd2b2-aec1-4249-93c9-88fc3a5b9fa3
 if current_champs !== missing
-	renders = [
-		render_champ_items(c)
-		for c in current_champs
-	]
+	renders = map((c)->viz.Viz.render_champ_items(c, rd.items), current_champs)
 
 	md"""
 	  ## Popular items for selected champions:
@@ -1643,20 +1281,16 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 
 # ╔═╡ Cell order:
 # ╟─7d3b92bc-e204-11ec-1da7-f5f3d36f2b35
-# ╟─7bc24ef4-e910-4651-8ca4-2c012b670161
 # ╟─861f00e8-c967-4281-9b12-0b510082580d
-# ╟─8a641b43-8ea3-49c6-ae3c-148542beba07
-# ╟─0ae7bdeb-690e-4096-b9f9-13c3a9624ff1
-# ╟─5260fa13-db26-4379-8df1-dd5bdedd3ff3
-# ╟─2054f69b-07b8-4dc4-91dc-cdfed8481b39
-# ╟─3d0fcdac-8a4b-489e-8940-215c4e0b4c26
 # ╟─3731faa2-4d9f-4d98-b095-781a7c2464c1
+# ╟─456cc811-c813-4258-9dc3-18a0e8a7ae8a
+# ╟─987ddc96-f47f-4244-8e93-696b9acd4a07
 # ╟─3830b19e-3365-4f30-9e93-3304fe5a345b
 # ╟─80a9b48a-ff99-449c-ba6e-309ced8e5726
 # ╟─64954f9d-8540-46fb-b9ac-7618f6c683b1
 # ╟─19a275ae-6c7b-4301-b5b5-fac45825e621
 # ╟─5bbd2c5f-3a89-419f-8936-f063c853fd43
-# ╠═d89ed438-0339-4c06-b5a9-cc5f78f0cc4b
+# ╟─d89ed438-0339-4c06-b5a9-cc5f78f0cc4b
 # ╟─5069a831-7a20-4534-83ba-095212ebdef8
 # ╟─bf9b68cd-5e0a-4d9f-9486-a8a09e5adb58
 # ╟─744599ac-f0b4-404e-8aa7-890196210dcc
