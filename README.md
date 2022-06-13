@@ -1,8 +1,8 @@
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/Gonzih/tft-meta-analysis/v0.1.5?urlpath=pluto%2Fopen%3Fpath%3Dcomp_selector.jl)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/Gonzih/tft-meta-analysis/v0.2.0?urlpath=pluto%2Fopen%3Fpath%3Dcomp_selector.jl)
 
 # TFT Match history analysis
 
-![Demo](screenshots/demo2.png)
+![Demo](screenshots/demo3.png)
 
 # Running
 
