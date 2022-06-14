@@ -21,7 +21,7 @@ build-docker-image:
 	docker build -f Dockerfile.live -t $(LIVE_IMAGE_NAME) .
 
 build-public-image:
-	docker build -f Dockerfile -t $(PUBLIC_IMAGE_NAME):latest .
+	docker build -f Dockerfile.public -t $(PUBLIC_IMAGE_NAME):latest .
 	docker tag $(PUBLIC_IMAGE_NAME):latest $(PUBLIC_IMAGE_NAME):$(DOCKER_TAG)
 
 docker-run-public: build-public-image
