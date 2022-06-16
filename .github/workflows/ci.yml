@@ -20,6 +20,7 @@ jobs:
           path: notebooks/cache
           key: notebooks-cache
       - run: echo "RIOT_API_KEY=${{ secrets.RIOT_API_KEY }}" > .env
+      - run: make chmod-data-cache
       - run: make scrape-all
       - run: make docker-build-public
   deploy:

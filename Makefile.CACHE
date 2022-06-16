@@ -15,3 +15,6 @@ pack-data:
 
 unpack-data:
 	tar xvjf data.tar.bz2 notebooks/data
+
+chmod-data-cache:
+	chmod 777 -R notebooks/data notebooks/cache
