@@ -1,0 +1,49 @@
+name: CI
+
+on: push
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Cache Notebooks Cache
+        id: cache-notebooks-cache
+        uses: actions/cache@v3
+        with:
+          path: notebooks/cache
+          key: notebooks-cache
+      - name: Cache Notebooks Data
+        id: cache-notebooks-data
+        uses: actions/cache@v3
+        with:
+          path: notebooks/data
+          key: notebooks-data
+      - run: make scrape-all
+      - name: Cache Notebooks Cache
+        id: cache-notebooks-cache
+        uses: actions/cache@v3
+        with:
+          path: notebooks/cache
+          key: notebooks-cache
+      - name: Cache Notebooks Data
+        id: cache-notebooks-data
+        uses: actions/cache@v3
+        with:
+          path: notebooks/data
+          key: notebooks-data
+      - run: make docker-build-public
+  deploy:
+    needs: build
+    name: Deploy
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v2
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - run: make docker-push-public
