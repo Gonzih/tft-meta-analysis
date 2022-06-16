@@ -20,6 +20,7 @@ jobs:
         with:
           path: notebooks/data
           key: notebooks-data
+      - run: echo "RIOT_API_KEY=${{ secrets.RIOT_API_KEY }}" > .env
       - run: make scrape-all
       - name: Cache Notebooks Cache
         id: cache-notebooks-cache-push
