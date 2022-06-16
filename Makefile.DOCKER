@@ -24,16 +24,16 @@ build-public-image:
 	docker build -f Dockerfile.public -t $(PUBLIC_IMAGE_NAME):latest .
 	docker tag $(PUBLIC_IMAGE_NAME):latest $(PUBLIC_IMAGE_NAME):$(DOCKER_TAG)
 
-docker-run-public: build-public-image
-	docker run $(DOCKER_PORT_ARGS) -ti $(PUBLIC_IMAGE_NAME)
+docker-run-public:
+	docker run $(DOCKER_PORT_ARGS) -t $(PUBLIC_IMAGE_NAME)
 
-docker-push-public: build-public-image
+docker-push-public:
 	docker push --all-tags $(PUBLIC_IMAGE_NAME)
 
 docker-run-scrape: build-docker-image
-	docker run $(DOCKER_V_ARGS) -ti $(IMAGE_NAME) su -c "julia /notebooks/scripts/scrape.jl" julia
+	docker run $(DOCKER_V_ARGS) -t $(IMAGE_NAME) su -c "julia /notebooks/scripts/scrape.jl" julia
 
 docker-run-export: build-docker-image
-	docker run $(DOCKER_V_ARGS) -ti $(IMAGE_NAME) su -c "julia /notebooks/scripts/export.jl" julia
+	docker run $(DOCKER_V_ARGS) -t $(IMAGE_NAME) su -c "julia /notebooks/scripts/export.jl" julia
 
 scrape-all: clear-cache docker-run-scrape docker-run-export pack-cache pack-data
