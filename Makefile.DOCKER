@@ -28,6 +28,9 @@ build-public-image:
 docker-run-public:
 	docker run $(DOCKER_PORT_ARGS) -t $(PUBLIC_IMAGE_NAME)
 
+docker-pull-public:
+	docker pull $(PUBLIC_IMAGE_NAME):latest
+
 docker-push-public:
 	docker push --all-tags $(PUBLIC_IMAGE_NAME)
 
