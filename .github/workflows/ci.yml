@@ -9,13 +9,13 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Cache Notebooks Cache
-        id: cache-notebooks-cache-pull
+        id: cache-notebooks-cache
         uses: actions/cache@v3
         with:
           path: notebooks/cache
           key: notebooks-cache
       - name: Cache Notebooks Data
-        id: cache-notebooks-data-pull
+        id: cache-notebooks-data
         uses: actions/cache@v3
         with:
           path: notebooks/data
