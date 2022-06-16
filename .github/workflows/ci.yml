@@ -22,7 +22,7 @@ jobs:
       - run: echo "RIOT_API_KEY=${{ secrets.RIOT_API_KEY }}" > .env
       - run: make chmod-data-cache
       - run: make scrape-all
-      - run: make docker-build-public
+      - run: make build-public-image
   deploy:
     needs: build
     name: Deploy
