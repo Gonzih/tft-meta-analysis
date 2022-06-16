@@ -9,26 +9,26 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Cache Notebooks Cache
-        id: cache-notebooks-cache
+        id: cache-notebooks-cache-pull
         uses: actions/cache@v3
         with:
           path: notebooks/cache
           key: notebooks-cache
       - name: Cache Notebooks Data
-        id: cache-notebooks-data
+        id: cache-notebooks-data-pull
         uses: actions/cache@v3
         with:
           path: notebooks/data
           key: notebooks-data
       - run: make scrape-all
       - name: Cache Notebooks Cache
-        id: cache-notebooks-cache
+        id: cache-notebooks-cache-push
         uses: actions/cache@v3
         with:
           path: notebooks/cache
           key: notebooks-cache
       - name: Cache Notebooks Data
-        id: cache-notebooks-data
+        id: cache-notebooks-data-push
         uses: actions/cache@v3
         with:
           path: notebooks/data
