@@ -213,10 +213,10 @@ function import_all_data(n_days::Int64, placement::Int64)
     dfs = map((f) -> DataFrame(CSV.File("data/$(f).csv")), df_files)
 
     matches_df = first(dfs)
-    match_ids = filter((r) -> filter_by_datetime(r, n_days), matches_df).MatchID
+    match_ids = unique(filter((r) -> filter_by_datetime(r, n_days), matches_df).MatchID)
 
     participants_df = dfs[2]
-    puuids = filter((r) -> r.Placement <= placement, participants_df).PUUID
+    puuids = unique(filter((r) -> r.Placement <= placement, participants_df).PUUID)
 
     dfs = map((df) -> filter((r) -> r.MatchID in match_ids, df), dfs)
 
