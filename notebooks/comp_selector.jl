@@ -71,7 +71,7 @@ end
 
 # ╔═╡ 80a9b48a-ff99-449c-ba6e-309ced8e5726
 begin
-	placement_f = @bind placement_cutoff NumberField(1:8; default = 3)
+	placement_f = @bind placement_filter NumberField(1:8; default = 3)
 	md"""
 	### Select only partcicipants that took top $(placement_f) spots
 	"""
@@ -84,12 +84,14 @@ end
 begin
 	refresh_button
 	
-	@time rd = riot.Riot.import_all_data(n_days)
+	@time rd = riot.Riot.import_all_data(n_days, placement_filter)
 	
 	md"""
 	##### Fetched matches for $(n_days) days
-	
-	##### Got $(length(rd.participants.PUUID)) participant rows
+
+	##### Got $(length(rd.participants.PUUID)) match results
+	##### Got $(length(unique(rd.participants.PUUID))) participants
+	##### Got $(length(unique(rd.matches.MatchID))) matches
 	"""
 end
 
@@ -233,7 +235,6 @@ end
 # ╔═╡ 1771bc71-8d82-424d-8406-bf4d2e57d611
 if current_champs !== missing
 	df = innerjoin(rd.units, rd.traits, rd.participants, on = [:MatchID, :PUUID])
-	df = filter(r->r.Placement <= placement_cutoff, df)
 	if length(trait_filter) > 0
 		df = filter((r)-> 
 						r.Trait in keys(trait_filter) &&
@@ -718,9 +719,9 @@ version = "0.13.6"
 
 [[deps.InverseFunctions]]
 deps = ["Test"]
-git-tree-sha1 = "c6cf981474e7094ce044168d329274d797843467"
+git-tree-sha1 = "b3364212fb5d870f724876ffcd34dd8ec6d98918"
 uuid = "3587e190-3f89-42d0-90ee-14403ec27112"
-version = "0.1.6"
+version = "0.1.7"
 
 [[deps.InvertedIndices]]
 git-tree-sha1 = "bee5f1ef5bf65df56bdd2e40447590b272a5471f"
@@ -907,9 +908,9 @@ uuid = "ca575930-c2e3-43a9-ace4-1e988b2c1908"
 
 [[deps.OffsetArrays]]
 deps = ["Adapt"]
-git-tree-sha1 = "8694b777fe710111c65879fcc1184f8422b6d910"
+git-tree-sha1 = "ec2e30596282d722f018ae784b7f44f3b88065e4"
 uuid = "6fe1bfb0-de20-5000-8ca7-80f57d26f881"
-version = "1.12.3"
+version = "1.12.6"
 
 [[deps.OpenBLAS_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
@@ -942,9 +943,9 @@ uuid = "efcefdf7-47ab-520b-bdef-62a2eaa19f15"
 
 [[deps.PDMats]]
 deps = ["LinearAlgebra", "SparseArrays", "SuiteSparse"]
-git-tree-sha1 = "3411935b2904d5ad3917dee58c03f0d9e6ca5355"
+git-tree-sha1 = "3e32c8dbbbe1159a5057c80b8a463369a78dd8d8"
 uuid = "90014a1f-27ba-587c-ab20-58faa44d9150"
-version = "0.11.11"
+version = "0.11.12"
 
 [[deps.Parsers]]
 deps = ["Dates"]
@@ -963,15 +964,15 @@ uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 
 [[deps.Pluto]]
 deps = ["Base64", "Configurations", "Dates", "Distributed", "FileWatching", "FuzzyCompletions", "HTTP", "HypertextLiteral", "InteractiveUtils", "Logging", "MIMEs", "Markdown", "MsgPack", "Pkg", "PrecompileSignatures", "REPL", "RelocatableFolders", "Sockets", "TOML", "Tables", "URIs", "UUIDs"]
-git-tree-sha1 = "1c340815f709cb59831ada9f6b273ebd56863177"
+git-tree-sha1 = "87b0f17b2a71eb4a20b61eed34975055fe5537dd"
 uuid = "c3e4b0f8-55cb-11ea-2926-15256bba5781"
-version = "0.19.8"
+version = "0.19.9"
 
 [[deps.PlutoSliderServer]]
-deps = ["AbstractPlutoDingetjes", "Base64", "BetterFileWatching", "Configurations", "Distributed", "FromFile", "Git", "GitHubActions", "HTTP", "Logging", "Pkg", "Pluto", "SHA", "Sockets", "TOML", "TerminalLoggers", "UUIDs"]
-git-tree-sha1 = "a12a74018cfe99d72880ed4f3f994d5839ee8fc2"
+deps = ["AbstractPlutoDingetjes", "Base64", "BetterFileWatching", "Configurations", "Distributed", "FromFile", "Git", "GitHubActions", "HTTP", "JSON", "Logging", "Pkg", "Pluto", "SHA", "Sockets", "TOML", "TerminalLoggers", "UUIDs"]
+git-tree-sha1 = "5496bc77ee81a91187dc3b9de3a32a631c562575"
 uuid = "2fc8631c-6f24-4c5b-bca7-cbb509c42db4"
-version = "0.3.10"
+version = "0.3.11"
 
 [[deps.PlutoUI]]
 deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "Markdown", "Random", "Reexport", "UUIDs"]
@@ -1138,9 +1139,9 @@ version = "2.1.6"
 
 [[deps.StaticArrays]]
 deps = ["LinearAlgebra", "Random", "Statistics"]
-git-tree-sha1 = "383a578bdf6e6721f480e749d503ebc8405a0b22"
+git-tree-sha1 = "2bbd9f2e40afd197a1379aef05e0d85dba649951"
 uuid = "90137ffa-7385-5640-81b9-e52037218182"
-version = "1.4.6"
+version = "1.4.7"
 
 [[deps.Statistics]]
 deps = ["LinearAlgebra", "SparseArrays"]
@@ -1148,9 +1149,9 @@ uuid = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 
 [[deps.StatsAPI]]
 deps = ["LinearAlgebra"]
-git-tree-sha1 = "c82aaa13b44ea00134f8c9c89819477bd3986ecd"
+git-tree-sha1 = "2c11d7290036fe7aac9038ff312d3b3a2a5bf89e"
 uuid = "82ae8749-77ed-4fe6-ae5f-f523153014b0"
-version = "1.3.0"
+version = "1.4.0"
 
 [[deps.StatsBase]]
 deps = ["DataAPI", "DataStructures", "LinearAlgebra", "LogExpFunctions", "Missings", "Printf", "Random", "SortingAlgorithms", "SparseArrays", "Statistics", "StatsAPI"]

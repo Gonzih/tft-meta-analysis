@@ -205,13 +205,30 @@ function export_all_data(data::RiotData)
     end
 end
 
-function import_all_data(n_days::Int64)
+function fltr!(df, puuids)
+    filter!((r) -> r.PUUID in puuids, df)
+end
+
+function import_all_data(n_days::Int64, placement::Int64)
     dfs = map((f) -> DataFrame(CSV.File("data/$(f).csv")), df_files)
+
     matches_df = first(dfs)
     match_ids = filter((r) -> filter_by_datetime(r, n_days), matches_df).MatchID
+
+    participants_df = dfs[2]
+    puuids = filter((r) -> r.Placement <= placement, participants_df).PUUID
+
     dfs = map((df) -> filter((r) -> r.MatchID in match_ids, df), dfs)
 
-    RiotData(dfs...)
+    data = RiotData(dfs...)
+
+    fltr!(data.participants, puuids)
+    fltr!(data.augments, puuids)
+    fltr!(data.traits, puuids)
+    fltr!(data.units, puuids)
+    fltr!(data.items, puuids)
+
+    data
 end
 
 function is_data_present()
