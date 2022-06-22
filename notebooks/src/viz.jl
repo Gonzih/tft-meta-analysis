@@ -101,9 +101,12 @@ function mapaugmentname(s)
         "Pandorass" => "PandorasItems",
         "MikaelsGift" => "IntercosmicGifts",
         "Augment_BruiserEmblem" => "BruiserCrest",
+        "Augment_BruiserTrait" => "BruiserHeart",
+        "Augment_AssasinTrait" => "AssasinHeart",
         "Augment_Ragewing" => "",
         "Augment_Bruiser" => "",
         "Augment_Swiftshot" => "",
+        "Augment_Shapeshifter" => "",
         "Emblem2" => "Crest",
         "Emblem3" => "Crown",
         "RevelEmblem2" => "RevelCrest",
@@ -347,7 +350,7 @@ function calc_winrates(df, col)
 		    total = nrow(filter((r)->r[col] == v, df))
 		    wins =  nrow(filter((r)->r[col] == v && r.Placement == 1, df))
 
-		    (v, round(wins/total*100), wins, total)
+		    (v, wins/total*100, wins, total)
 	  end
 
 	  winrates = [calc_winrate(v) for v in unique_values]
@@ -398,6 +401,7 @@ function winrate_simple(df, col; limit = 10, icon_kind = :champ, champ_cost_dict
               $(r[3])/$(r[4])
             </div>
             """)
+
             for r in winrates
         ]
 
