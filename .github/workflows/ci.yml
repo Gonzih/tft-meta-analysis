@@ -73,7 +73,8 @@ jobs:
       - run: make chmod-data-cache
 
       - run: make docker-run-export
-      - run: chmod 777 notebooks
+      - run: touch notebooks/meta.html
+      - run: chmod 777 notebooks/*.html
       - run: make docker-run-export-notebooks
 
       - name: publish
