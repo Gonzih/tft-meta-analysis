@@ -1,4 +1,6 @@
-include("./pkgs.jl")
+using Pkg
+Pkg.activate(".")
+Pkg.instantiate()
 
 module Riot
 
