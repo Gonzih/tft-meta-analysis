@@ -50,13 +50,14 @@ RUN chown ${NB_UID} /home/${NB_USER} -R
 
 # ========== Install IJulia as application user ==========
 
+WORKDIR /app/notebooks
+
 ADD ./notebooks /app/notebooks
 ADD ./data.tar.bz2 /app
-RUN chown ${NB_UID} /app -R
 ADD jupyter_notebook_config.py ${HOME}/.jupyter/jupyter_notebook_config.py
 RUN chown ${NB_UID} ${HOME}/.jupyter -R
+RUN chown ${NB_UID} /app -R
 
 USER ${NB_USER}
 RUN julia /app/notebooks/src/pkgs.jl
-WORKDIR /app/notebooks
 CMD ["julia", "--optimize=0", "-e", "import Pluto; Pluto.run(host=\"0.0.0.0\", port=8888, launch_browser=false, require_secret_for_open_links=false, require_secret_for_access=false)"]
