@@ -21,11 +21,27 @@ jobs:
         with:
           path: notebooks/cache
           key: notebooks-cache
-
       - run: du -hs notebooks/cache
+
       - run: echo "RIOT_API_KEY=${{ secrets.RIOT_API_KEY }}" > .env
       - run: make chmod-data-cache
       - run: make scrape-all
+
+  docker-public:
+    name: Docker Public Image
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    steps:
+      - name: Cache Notebooks Cache
+        id: cache-notebooks-cache
+        uses: actions/cache@v3
+        with:
+          path: notebooks/cache
+          key: notebooks-cache
+      - run: du -hs notebooks/cache
+
+      - run: make docker-run-export pack-cache pack-data
       - run: make build-public-image
 
       - name: Login to Docker Hub
@@ -34,6 +50,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - run: make docker-push-public
+
   render:
     name: Render
     runs-on: ubuntu-latest
@@ -48,9 +65,9 @@ jobs:
         with:
           path: notebooks/cache
           key: notebooks-cache
+      - run: du -hs notebooks/cache
 
       - run: echo "RIOT_API_KEY=${{ secrets.RIOT_API_KEY }}" > .env
-      - run: du -hs notebooks/cache
       - run: make chmod-data-cache
 
       - run: make docker-run-export

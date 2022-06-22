@@ -47,5 +47,3 @@ docker-run-export: build-docker-image
 
 docker-run-export-notebooks:  build-docker-image
 	docker run $(DOCKER_V_ARGS) -t $(IMAGE_NAME) su -c "julia /notebooks/scripts/export_notebooks.jl" julia
-
-scrape-all: clear-cache docker-run-scrape docker-run-export pack-cache pack-data
