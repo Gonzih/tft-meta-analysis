@@ -57,7 +57,7 @@ itemmappings = Dict(
     "RapidFireCannon" => "RapidFirecannon",
     "Shroud" => "ShroudofStillness",
     "SeraphsEmbrace" => "BlueBuff",
-    "GuardianAngel" => "TitansResolve",
+    "GuardianAngel" => "EdgeofNight",
     "TitanicHydra" => "ZzRotPortal",
     "ForceOfNature" => "TacticiansCrown",
     "RedBuff" => "SunfireCape",
@@ -90,29 +90,36 @@ end
 augmentmappings = Dict(
 )
 
-function mapaugmentname(s, tier="")
-    s = lowercase(s)
-    s = replace(s, "OfThe" => "")
+function mapaugmentname(s)
+    s = replace(
+        s,
+        "Diversify" => "TriForce", # not sure abotu this one
+        "ForceOfNature" => "NewRecruit", # should be right?
+        "BlueBattery2" => "BlueBattery",
+        "GrabBag1" => "ItemGrabBag1",
+        "TomeOfTraits" => "AncientArchives",
+        "Pandorass" => "PandorasItems",
+        "MikaelsGift" => "IntercosmicGifts",
+        "Augment_BruiserEmblem" => "BruiserCrest",
+        "Augment_Ragewing" => "",
+        "Augment_Bruiser" => "",
+        "Augment_Swiftshot" => "",
+        "Augment_" => "",
+        "Emblem" => "Crest",
+        "MaxLevel10" => "LevelUp!",
+    )
 
-    "$(s)$(tier)"
+    s = replace(
+        s,
+        "UrfsItemGrabBag1" => "UrfsGrabBag1",
+    )
+
+    "$(s)"
 end
 
 function find_augment_link(s)
-    url = ""
-
-    for tier in ["", "1", "2", "3", "-i", "-ii", "-iii"]
-        fname = mapaugmentname(s, tier)
-        url = "https://cdn.metatft.com/file/metatft/set7/augments/$(fname).png"
-        try
-            resp = HTTP.head(url)
-            if resp.status == 200
-                return url
-            end
-        catch e
-        end
-    end
-
-    url
+    fname = mapaugmentname(s)
+    "https://rerollcdn.com/augments/7/$(fname).png"
 end
 
 function icon_for(s, kind = :champ; set = "7")
@@ -369,7 +376,7 @@ function winrate_simple(df, col; limit = 10, icon_kind = :champ, champ_cost_dict
         inputs = [
             @htl("""
             <div class="centered" style="margin-bottom:10px; cursor: pointer;" onclick=$(onclick(r[1]))>
-              $(render_icon(r[1], icon_kind))
+              $(render_icon(r[1], icon_kind, champ_cost_dict))
             </div>
             <div class="centered" style="margin-bottom:10px;">
               <progress value=$(r[2]) max=$(max_v) style='width: 100%' />
