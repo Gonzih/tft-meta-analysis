@@ -72,10 +72,10 @@ jobs:
 
       - run: echo "RIOT_API_KEY=${{ secrets.RIOT_API_KEY }}" > .env
       - run: make chmod-data-cache
-
-      - run: make docker-run-export
       - run: touch notebooks/meta.html
       - run: chmod 777 notebooks/*.html
+
+      - run: make docker-run-export
       - run: make docker-run-export-notebooks
 
       - name: publish

@@ -30,7 +30,7 @@ end
 
 # ╔═╡ 6d7514f3-6e0d-4453-9247-57d7a935efe5
 begin
-	graph_limit = 200
+	graph_limit = 30
 	md"""
 	## Limit graphs to $(graph_limit) items
 	"""
@@ -455,7 +455,7 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╟─1bf1fdca-959b-436c-b9d2-92feacddc04f
 # ╟─a440d4bb-8f74-4bf3-8537-3031584437e6
 # ╟─37edb2b7-bf84-4758-8d6a-808496455aef
-# ╠═6d7514f3-6e0d-4453-9247-57d7a935efe5
+# ╟─6d7514f3-6e0d-4453-9247-57d7a935efe5
 # ╟─ebd2225e-c774-4991-bba7-c50ce3cf82b4
 # ╟─f6381caa-8655-440d-b0c6-dfa52c60f2f5
 # ╟─61786d69-c9bc-4a6f-99b7-78741387c765
