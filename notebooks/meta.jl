@@ -41,7 +41,7 @@ begin
 	item_df = innerjoin(rd.items, rd.participants, on = [:MatchID, :PUUID])
 	item_graph = viz.Viz.winrate_simple(item_df, :Item, limit=graph_limit, icon_kind=:item)
 	md"""
-	## Items wintare
+	## Items winrate
 	$(item_graph)
 	"""
 end
@@ -62,7 +62,7 @@ begin
 	champ_graph = viz.Viz.winrate_simple(units_df, :CharacterID, limit=graph_limit, icon_kind=:champ, champ_cost_dict=champ_cost)
 	
 	md"""
-	## Champ wintare
+	## Champ winrate
 	$(champ_graph)
 	"""
 end
@@ -73,7 +73,7 @@ begin
 	trait_graph = viz.Viz.winrate_simple(traits_df, :Trait, limit=graph_limit, icon_kind=:trait)
 	
 	md"""
-	## Trait wintare
+	## Trait winrate
 	$(trait_graph)
 	"""
 end
@@ -100,7 +100,7 @@ begin
 	
 	pair_graph = viz.Viz.winrate_simple(comp_pairs, :Pair, limit=graph_limit, icon_kind=:pair)
 	md"""
-	## Traits wintare
+	## Traits winrate
 	$(pair_graph)
 	"""
 end
@@ -110,7 +110,7 @@ begin
 	aug_df = innerjoin(rd.augments, rd.participants, on = [:MatchID, :PUUID])
 	aug_graph = viz.Viz.winrate_simple(aug_df, :Augment, limit=graph_limit, icon_kind=:augment, total_cutoff=0.0001)
 	md"""
-	## Augments wintare
+	## Augments winrate
 	$(aug_graph)
 	"""
 end
