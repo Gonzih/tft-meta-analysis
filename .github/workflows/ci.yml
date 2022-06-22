@@ -43,6 +43,7 @@ jobs:
           key: notebooks-cache
       - run: du -hs notebooks/cache
 
+      - run: echo "RIOT_API_KEY=${{ secrets.RIOT_API_KEY }}" > .env
       - run: make docker-run-export pack-cache pack-data
       - run: make build-public-image
 
