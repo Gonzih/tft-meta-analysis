@@ -7,7 +7,7 @@ DOCKER_PORT_ARGS := -p 8888:8888 -p 1234:1234 -p 2345:2345
 DOCKER_GPU_ARGS := --gpus all
 DOCKER_V_ARGS := -v $(shell pwd)/notebooks:/notebooks --env-file ./.env
 DOCKER_NAME_ARG := --name $(CONTAINER_NAME) --rm
-DOCKER_ARGS := $(DOCKER_NAME_ARG) $(DOCKER_GPU_ARGS) $(DOCKER_PORT_ARGS) $(DOCKER_V_ARGS)
+DOCKER_ARGS := $(DOCKER_NAME_ARG) $(DOCKER_PORT_ARGS) $(DOCKER_V_ARGS)
 DOCKER_TAG := 7
 
 docker-run: build-docker-image
