@@ -34,3 +34,11 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - run: make docker-push-public
+  render:
+    name: Render
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    steps:
+      - uses: actions/checkout@v2
+      - run: make docker-pull-public docker-run-export-notebooks
