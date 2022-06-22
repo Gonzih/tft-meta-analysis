@@ -8,8 +8,8 @@ on:
     - cron: '0 */12 * * *'
 
 jobs:
-  build:
-    name: Build
+  scrape:
+    name: Scrape
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
@@ -31,7 +31,7 @@ jobs:
     name: Docker Public Image
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-    needs: build
+    needs: scrape
     steps:
       - name: Cache Notebooks Cache
         id: cache-notebooks-cache
@@ -55,7 +55,7 @@ jobs:
     name: Render
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-    needs: build
+    needs: scrape
     steps:
       - uses: actions/checkout@v2
 
