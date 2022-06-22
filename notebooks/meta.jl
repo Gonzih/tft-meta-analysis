@@ -108,7 +108,7 @@ end
 # ╔═╡ 37768219-5254-4f0e-a6f0-ea98f595bbe0
 begin
 	aug_df = innerjoin(rd.augments, rd.participants, on = [:MatchID, :PUUID])
-	aug_graph = viz.Viz.winrate_simple(aug_df, :Augment, limit=graph_limit, icon_kind=:augment)
+	aug_graph = viz.Viz.winrate_simple(aug_df, :Augment, limit=graph_limit, icon_kind=:augment, total_cutoff=0.0001)
 	md"""
 	## Augments wintare
 	$(aug_graph)

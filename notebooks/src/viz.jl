@@ -104,9 +104,19 @@ function mapaugmentname(s)
         "Augment_Ragewing" => "",
         "Augment_Bruiser" => "",
         "Augment_Swiftshot" => "",
+        "Emblem2" => "Crest",
+        "Emblem3" => "Crown",
+        "RevelEmblem2" => "RevelCrest",
+        "Augment_RevelParty" => "Party",
         "Augment_" => "",
         "Emblem" => "Crest",
+        "CavalierForAllUnits" => "CavalierUnity",
         "MaxLevel10" => "LevelUp!",
+        "Twins" => "DoubleTrouble",
+        "GuildLootHR" => "LootMaster",
+        "RevelEmblem2" => "RevelCrown",
+        "ScalescornTrait" => "ScalescornHeart",
+        "HR" => "",
     )
 
     s = replace(
