@@ -24,7 +24,7 @@ viz.Viz.styles
 
 # ╔═╡ 37edb2b7-bf84-4758-8d6a-808496455aef
 begin
-	@time rd = riot.Riot.import_all_data(7, 8)
+	@time rd = riot.Riot.import_all_data(7, 10)
 	md"data"
 end
 
@@ -69,29 +69,31 @@ begin
 end
 
 # ╔═╡ 03bc4f2f-3bf9-4c01-9c00-fabda1bcd793
-#=begin
-    traits_df = innerjoin(rd.traits, rd.participants, on = [:MatchID, :PUUID])
-	sort!(traits_df, :NumUnits, rev=true)
-	gtdf = groupby(traits_df, [:MatchID, :PUUID])
+begin
+    trait_pairs_df = innerjoin(rd.traits, rd.participants, on = [:MatchID, :PUUID])
+	sort!(trait_pairs_df, :NumUnits, rev=true)
+	gtdf = groupby(trait_pairs_df, [:MatchID, :PUUID])
 
 	comp_pairs = DataFrame()
 
 	for g in gtdf 
 		pair = first(g, 2)
+		
 		df = DataFrame(
-			Trait = pair.Trait,
-			Pair = pair,
-			Placement = pair.Placement
+			Pair = join(pair.Trait, "|"),
+			Placement = first(pair.Placement)
 		)
 		append!(comp_pairs, df)
 	end
+
+	comp_pairs
 	
 	pair_graph = viz.Viz.winrate_simple(comp_pairs, :Pair, limit=graph_limit, icon_kind=:pair)
 	md"""
 	## Traits wintare
 	$(pair_graph)
 	"""
-end=#
+end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1095,13 +1097,13 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╔═╡ Cell order:
 # ╟─4e661396-f1e4-11ec-0fcf-03684abf11f0
 # ╟─0c246731-f574-4659-8396-7a848475bec9
-# ╠═1bf1fdca-959b-436c-b9d2-92feacddc04f
+# ╟─1bf1fdca-959b-436c-b9d2-92feacddc04f
 # ╟─a440d4bb-8f74-4bf3-8537-3031584437e6
 # ╟─37edb2b7-bf84-4758-8d6a-808496455aef
 # ╟─6d7514f3-6e0d-4453-9247-57d7a935efe5
 # ╟─ebd2225e-c774-4991-bba7-c50ce3cf82b4
 # ╟─61786d69-c9bc-4a6f-99b7-78741387c765
 # ╟─0fdccd3a-8d8a-4df3-bdd1-decf89482c10
-# ╠═03bc4f2f-3bf9-4c01-9c00-fabda1bcd793
+# ╟─03bc4f2f-3bf9-4c01-9c00-fabda1bcd793
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

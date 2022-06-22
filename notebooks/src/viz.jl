@@ -131,6 +131,8 @@ function render_pair_icons(pair)
     kind = :pair
     icons = []
 
+    pair = split(pair, "|")
+
     for s in pair
         img = render_icon(s, :trait)
         push!(icons, img)
@@ -148,7 +150,7 @@ function render_icon(s, kind = :champ, champ_cost_dict = Dict())
         color = rarity_color_for(s, champ_cost_dict)
         style = "border-color: $color"
 
-        @htl("<img class=$(klass) src=$(src) alt=$(s) style=$(style) />")
+        @htl("<img class=$(klass) src=$(src) alt=$(s) title=$(s) style=$(style) />")
     end
 end
 
@@ -324,10 +326,8 @@ function calc_winrates(df, col)
 	  unique_values = unique(df[!, col])
 
 	  calc_winrate = function(v)
-		    all_matches = filter((r)->r[col] == v, df)
-		    total = nrow(all_matches)
-		    win_matches = filter((r)-> r.Placement == 1, all_matches)
-		    wins = nrow(win_matches)
+		    total = nrow(filter((r)->r[col] == v, df))
+		    wins =  nrow(filter((r)->r[col] == v && r.Placement == 1, df))
 
 		    (v, round(wins/total*100), wins, total)
 	  end
@@ -356,7 +356,8 @@ function winrate_simple(df, col; limit = 10, icon_kind = :champ, champ_cost_dict
     base_width = 40
     icon_width = "$(base_width)px"
     if icon_kind == :pair
-        iwidth = base_width * length(first(df[!, col]))
+        pair = split(first(df[!, col]), "|")
+        iwidth = base_width * length(pair)
         icon_width = "$(iwidth)px"
     end
     label_width = "65px"
@@ -373,7 +374,7 @@ function winrate_simple(df, col; limit = 10, icon_kind = :champ, champ_cost_dict
               <progress value=$(r[2]) max=$(max_v) style='width: 100%' />
             </div>
             <div class="centered" style="margin-bottom:10px">
-              $(r[2])%
+              $(floor(r[2]))%
             </div>
             <div class="centered" style="margin-bottom:10px">
               $(r[3])/$(r[4])
