@@ -295,7 +295,8 @@ function freq_simple(coll; limit = 10, icon_kind = :champ, champ_cost_dict = Dic
     base_width = 40
     icon_width = "$(base_width)px"
     if icon_kind == :pair
-        iwidth = base_width * length(first(coll))
+        pair = split(first(coll), "|")
+        iwidth = base_width * length(pair)
         icon_width = "$(iwidth)px"
     end
 

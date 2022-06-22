@@ -134,7 +134,7 @@ begin
 
 	for g in gtdf 
 		pair = first(g, comp_graph_limit)
-		push!(comp_pairs, pair.Trait)
+		push!(comp_pairs, join(pair.Trait, "|"))
 	end
 
 	comp_graph = viz.Viz.freq_simple(comp_pairs; icon_kind=:pair)
@@ -142,6 +142,17 @@ begin
 	md"""
 	## Popular comps
 	$(comp_graph)
+	"""
+end
+
+# ╔═╡ 032fd44c-13fa-40a5-83e1-d281c6060781
+begin
+	augments_viz = viz.Viz.freq_simple(rd.augments.Augment; limit=15, icon_kind=:augment)
+	
+	
+	md"""
+	## Popular augments
+	$(augments_viz)
 	"""
 end
 
@@ -1267,7 +1278,7 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╔═╡ Cell order:
 # ╟─7d3b92bc-e204-11ec-1da7-f5f3d36f2b35
 # ╟─3731faa2-4d9f-4d98-b095-781a7c2464c1
-# ╟─456cc811-c813-4258-9dc3-18a0e8a7ae8a
+# ╠═456cc811-c813-4258-9dc3-18a0e8a7ae8a
 # ╟─21f98140-fa1d-4092-93ae-3947f8ad6694
 # ╟─987ddc96-f47f-4244-8e93-696b9acd4a07
 # ╟─3830b19e-3365-4f30-9e93-3304fe5a345b
@@ -1280,6 +1291,7 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╟─bf9b68cd-5e0a-4d9f-9486-a8a09e5adb58
 # ╟─744599ac-f0b4-404e-8aa7-890196210dcc
 # ╟─26e9433d-c599-4a83-8a8a-49cc7b31c0b1
+# ╟─032fd44c-13fa-40a5-83e1-d281c6060781
 # ╟─14fb0cd0-8a18-458a-b1f9-992ef46108f2
 # ╟─9e4f28be-a462-4580-87da-5b9ef34dcd93
 # ╟─7f472eeb-e3d2-4174-b19a-b10e3904e96e
