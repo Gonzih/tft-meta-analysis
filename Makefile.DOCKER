@@ -1,11 +1,13 @@
 IMAGE_NAME := docker-julia-jupyter
 LIVE_IMAGE_NAME := docker-pluto-live
 PUBLIC_IMAGE_NAME := gonzih/tft.jl
+CONTAINER_NAME := gonzih-tft
 
 DOCKER_PORT_ARGS := -p 8888:8888 -p 1234:1234 -p 2345:2345
 DOCKER_GPU_ARGS := --gpus all
 DOCKER_V_ARGS := -v $(shell pwd)/notebooks:/notebooks --env-file ./.env
-DOCKER_ARGS := $(DOCKER_GPU_ARGS) $(DOCKER_PORT_ARGS) $(DOCKER_V_ARGS)
+DOCKER_NAME_ARG := --name $(CONTAINER_NAME)
+DOCKER_ARGS := $(DOCKER_NAME_ARG) $(DOCKER_GPU_ARGS) $(DOCKER_PORT_ARGS) $(DOCKER_V_ARGS)
 DOCKER_TAG := 7
 
 docker-run: build-docker-image
@@ -26,10 +28,13 @@ build-public-image:
 	docker tag $(PUBLIC_IMAGE_NAME):latest $(PUBLIC_IMAGE_NAME):$(DOCKER_TAG)
 
 docker-run-public:
-	docker run $(DOCKER_PORT_ARGS) -t $(PUBLIC_IMAGE_NAME)
+	docker run $(DOCKER_NAME_ARG) $(DOCKER_PORT_ARGS) -t $(PUBLIC_IMAGE_NAME)
 
 docker-pull-public:
 	docker pull $(PUBLIC_IMAGE_NAME):latest
+
+docker-cp-from-public: clear-data
+	docker cp $(CONTAINER_NAME):/app/notebooks/data ./notebooks/
 
 docker-push-public:
 	docker push --all-tags $(PUBLIC_IMAGE_NAME)
