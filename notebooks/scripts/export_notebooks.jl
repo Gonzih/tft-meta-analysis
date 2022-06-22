@@ -1,3 +1,7 @@
+using Pkg
+Pkg.activate(".")
+Pkg.instantiate()
+
 using PlutoSliderServer
 
 for nb in ["/notebooks/meta.jl"]
