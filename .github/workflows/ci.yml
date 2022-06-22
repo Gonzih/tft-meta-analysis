@@ -33,6 +33,8 @@ jobs:
     if: github.ref == 'refs/heads/main'
     needs: scrape
     steps:
+      - uses: actions/checkout@v2
+
       - name: Cache Notebooks Cache
         id: cache-notebooks-cache
         uses: actions/cache@v3
