@@ -4,16 +4,6 @@
 using Markdown
 using InteractiveUtils
 
-# This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
-macro bind(def, element)
-    quote
-        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
-        local el = $(esc(element))
-        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
-        el
-    end
-end
-
 # ╔═╡ 4e661396-f1e4-11ec-0fcf-03684abf11f0
 begin
 	using DataFrames
@@ -34,49 +24,74 @@ viz.Viz.styles
 
 # ╔═╡ 37edb2b7-bf84-4758-8d6a-808496455aef
 begin
-	@time rd = riot.Riot.import_all_data(7, 3)
+	@time rd = riot.Riot.import_all_data(7, 8)
 	md"data"
 end
 
 # ╔═╡ 6d7514f3-6e0d-4453-9247-57d7a935efe5
 begin
-	limit_slider = @bind graph_limit Slider(5:100, default=15)
+	graph_limit = 20
 	md"""
-	## Limit graphs to $(limit_slider) items
+	## Limit graphs to $(graph_limit) items
 	"""
 end
 
-# ╔═╡ 5bd5b26a-d483-49ef-b14f-b856d4b328a9
-viz.Viz.freq_simple(rd.items.Item; limit=graph_limit, icon_kind=:item)
+# ╔═╡ ebd2225e-c774-4991-bba7-c50ce3cf82b4
+begin
+	item_df = innerjoin(rd.items, rd.participants, on = [:MatchID, :PUUID])
+	item_graph = viz.Viz.winrate_simple(item_df, :Item, limit=graph_limit, icon_kind=:item)
+	md"""
+	## Items wintare
+	$(item_graph)
+	"""
+end
+
+# ╔═╡ 61786d69-c9bc-4a6f-99b7-78741387c765
+begin
+	units_df = innerjoin(rd.units, rd.participants, on = [:MatchID, :PUUID])
+	champ_graph = viz.Viz.winrate_simple(units_df, :CharacterID, limit=graph_limit, icon_kind=:champ)
+	
+	md"""
+	## Champ wintare
+	$(champ_graph)
+	"""
+end
+
+# ╔═╡ 0fdccd3a-8d8a-4df3-bdd1-decf89482c10
+begin
+	traits_df = innerjoin(rd.traits, rd.participants, on = [:MatchID, :PUUID])
+	trait_graph = viz.Viz.winrate_simple(traits_df, :Trait, limit=graph_limit, icon_kind=:trait)
+	
+	md"""
+	## Trait wintare
+	$(trait_graph)
+	"""
+end
 
 # ╔═╡ 03bc4f2f-3bf9-4c01-9c00-fabda1bcd793
-begin
-	sorted_traits = sort(rd.traits, :NumUnits, rev=true)
-	gtdf = groupby(sorted_traits, [:MatchID, :PUUID])
+#=begin
+    traits_df = innerjoin(rd.traits, rd.participants, on = [:MatchID, :PUUID])
+	sort!(traits_df, :NumUnits, rev=true)
+	gtdf = groupby(traits_df, [:MatchID, :PUUID])
 
-	comp_pairs = []
+	comp_pairs = DataFrame()
 
 	for g in gtdf 
 		pair = first(g, 2)
-		push!(comp_pairs, pair.Trait)
+		df = DataFrame(
+			Trait = pair.Trait,
+			Pair = pair,
+			Placement = pair.Placement
+		)
+		append!(comp_pairs, df)
 	end
-
-	comp_graph = viz.Viz.freq_simple(comp_pairs; icon_kind=:pair)
-
+	
+	pair_graph = viz.Viz.winrate_simple(comp_pairs, :Pair, limit=graph_limit, icon_kind=:pair)
 	md"""
-	## Popular comps
-	$(comp_graph)
+	## Traits wintare
+	$(pair_graph)
 	"""
-end
-
-# ╔═╡ 2d2ebbd3-d4ea-4b56-ad5d-b09c50582518
-begin
-	aug_graph = viz.Viz.freq_simple(rd.augments.Augment; limit=graph_limit, icon_kind=:augment)
-	md"""
-	## Popular augments
-	$(aug_graph)
-	"""
-end
+end=#
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1080,12 +1095,13 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╔═╡ Cell order:
 # ╟─4e661396-f1e4-11ec-0fcf-03684abf11f0
 # ╟─0c246731-f574-4659-8396-7a848475bec9
-# ╟─1bf1fdca-959b-436c-b9d2-92feacddc04f
+# ╠═1bf1fdca-959b-436c-b9d2-92feacddc04f
 # ╟─a440d4bb-8f74-4bf3-8537-3031584437e6
 # ╟─37edb2b7-bf84-4758-8d6a-808496455aef
 # ╟─6d7514f3-6e0d-4453-9247-57d7a935efe5
-# ╟─5bd5b26a-d483-49ef-b14f-b856d4b328a9
-# ╟─03bc4f2f-3bf9-4c01-9c00-fabda1bcd793
-# ╟─2d2ebbd3-d4ea-4b56-ad5d-b09c50582518
+# ╟─ebd2225e-c774-4991-bba7-c50ce3cf82b4
+# ╟─61786d69-c9bc-4a6f-99b7-78741387c765
+# ╟─0fdccd3a-8d8a-4df3-bdd1-decf89482c10
+# ╠═03bc4f2f-3bf9-4c01-9c00-fabda1bcd793
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

@@ -100,7 +100,7 @@ end
 function find_augment_link(s)
     url = ""
 
-    for tier in ["", "1", "2", "3"]
+    for tier in ["", "1", "2", "3", "-i", "-ii", "-iii"]
         fname = mapaugmentname(s, tier)
         url = "https://cdn.metatft.com/file/metatft/set7/augments/$(fname).png"
         try
@@ -313,6 +313,77 @@ function freq_simple(coll; limit = 10, icon_kind = :champ, champ_cost_dict = Dic
 
         @htl("""
           <div style="display: grid; grid-template-columns: $(icon_width) auto;">
+            $(inputs)
+          </div>
+          <hr/>
+        """)
+    end
+end
+
+function calc_winrates(df, col)
+	  unique_values = unique(df[!, col])
+
+	  calc_winrate = function(v)
+		    all_matches = filter((r)->r[col] == v, df)
+		    total = nrow(all_matches)
+		    win_matches = filter((r)-> r.Placement == 1, all_matches)
+		    wins = nrow(win_matches)
+
+		    (v, round(wins/total*100), wins, total)
+	  end
+
+	  winrates = [calc_winrate(v) for v in unique_values]
+
+	  sort!(winrates, by=(r)->r[2], rev=true)
+
+	  winrates
+end
+
+function winrate_simple(df, col; limit = 10, icon_kind = :champ, champ_cost_dict = Dict(), total_cutoff = 0.005)
+    winrates = calc_winrates(df, col)
+
+    total_rows = nrow(df)
+    filter!((r)->r[4]/total_rows>total_cutoff, winrates)
+
+    winrates = first(winrates, limit)
+
+    onclick = (s) -> ""
+
+    if icon_kind == :champ
+        onclick = (s) -> "document.getElementById('champion_selector_div').addOption('$(s)');"
+    end
+
+    base_width = 40
+    icon_width = "$(base_width)px"
+    if icon_kind == :pair
+        iwidth = base_width * length(first(df[!, col]))
+        icon_width = "$(iwidth)px"
+    end
+    label_width = "65px"
+
+    max_v = 100
+
+    if nrow(df) > 0
+        inputs = [
+            @htl("""
+            <div class="centered" style="margin-bottom:10px; cursor: pointer;" onclick=$(onclick(r[1]))>
+              $(render_icon(r[1], icon_kind))
+            </div>
+            <div class="centered" style="margin-bottom:10px;">
+              <progress value=$(r[2]) max=$(max_v) style='width: 100%' />
+            </div>
+            <div class="centered" style="margin-bottom:10px">
+              $(r[2])%
+            </div>
+            <div class="centered" style="margin-bottom:10px">
+              $(r[3])/$(r[4])
+            </div>
+            """)
+            for r in winrates
+        ]
+
+        @htl("""
+          <div style="display: grid; grid-template-columns: $(icon_width) auto $(label_width) $(label_width);">
             $(inputs)
           </div>
           <hr/>
