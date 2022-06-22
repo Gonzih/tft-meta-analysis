@@ -7,6 +7,7 @@ using Random
 using PlutoUI
 using Markdown
 using InteractiveUtils
+using HTTP
 
 function rarity_color(rar)
     if rar == 0
@@ -86,6 +87,34 @@ function maptraitname(s)
     end
 end
 
+augmentmappings = Dict(
+)
+
+function mapaugmentname(s, tier="")
+    s = lowercase(s)
+    s = replace(s, "OfThe" => "")
+
+    "$(s)$(tier)"
+end
+
+function find_augment_link(s)
+    url = ""
+
+    for tier in ["", "1", "2", "3"]
+        fname = mapaugmentname(s, tier)
+        url = "https://cdn.metatft.com/file/metatft/set7/augments/$(fname).png"
+        try
+            resp = HTTP.head(url)
+            if resp.status == 200
+                return url
+            end
+        catch e
+        end
+    end
+
+    url
+end
+
 function icon_for(s, kind = :champ; set = "7")
     if kind == :champ
         "https://rerollcdn.com/characters/Skin/$(set)/$(mapcharname(s)).png"
@@ -93,6 +122,8 @@ function icon_for(s, kind = :champ; set = "7")
         "https://rerollcdn.com/icons/$(maptraitname(s)).png"
     elseif kind == :item
         "https://rerollcdn.com/items/$(mapitemname(s)).png"
+    elseif kind == :augment
+        find_augment_link(s)
     end
 end
 
@@ -117,9 +148,7 @@ function render_icon(s, kind = :champ, champ_cost_dict = Dict())
         color = rarity_color_for(s, champ_cost_dict)
         style = "border-color: $color"
 
-        @htl("""
-        <img class=$(klass) src=$(src) alt=$(s) style=$(style) />
-        """)
+        @htl("<img class=$(klass) src=$(src) alt=$(s) style=$(style) />")
     end
 end
 
@@ -361,5 +390,23 @@ waveform = @htl("""
 	  <div class="waveform__bar"></div>
 	</div>
 	""")
+
+styles = @htl("""
+<style>
+.icon {
+	width: 32px;
+	height: 32px;
+	border-width: 1px;
+	border-style: solid;
+	border-color: rgba(255, 255, 255, 0);
+}
+.centered {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+</style>
+Styles are here
+""")
 
 end

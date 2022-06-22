@@ -14,118 +14,42 @@ macro bind(def, element)
     end
 end
 
-# ╔═╡ 7d3b92bc-e204-11ec-1da7-f5f3d36f2b35
+# ╔═╡ 4e661396-f1e4-11ec-0fcf-03684abf11f0
 begin
-	#using PyPlot
-	#using Pipe
-	#using Gadfly
-	using FreqTables
 	using DataFrames
 	using HypertextLiteral
-	using Random
 	using PlutoUI
-
-	#Gadfly.push_theme(:dark)
 	
 	"dependencies"
 end
 
-# ╔═╡ 3731faa2-4d9f-4d98-b095-781a7c2464c1
+# ╔═╡ 0c246731-f574-4659-8396-7a848475bec9
 module riot include("src/riot.jl") end
 
-# ╔═╡ 456cc811-c813-4258-9dc3-18a0e8a7ae8a
+# ╔═╡ 1bf1fdca-959b-436c-b9d2-92feacddc04f
 module viz include("src/viz.jl") end
 
-# ╔═╡ 21f98140-fa1d-4092-93ae-3947f8ad6694
+# ╔═╡ a440d4bb-8f74-4bf3-8537-3031584437e6
 viz.Viz.styles
 
-# ╔═╡ 987ddc96-f47f-4244-8e93-696b9acd4a07
+# ╔═╡ 37edb2b7-bf84-4758-8d6a-808496455aef
 begin
-	waveform = viz.Viz.waveform
-	md"waveform"
+	@time rd = riot.Riot.import_all_data(7, 3)
+	md"data"
 end
 
-# ╔═╡ 3830b19e-3365-4f30-9e93-3304fe5a345b
+# ╔═╡ 6d7514f3-6e0d-4453-9247-57d7a935efe5
 begin
-	f = @bind n_days NumberField(1:30; default = 7)
+	limit_slider = @bind graph_limit Slider(5:100, default=15)
 	md"""
-	### Select only matches from the last $(f) days
+	## Limit graphs to $(limit_slider) items
 	"""
 end
 
-# ╔═╡ 80a9b48a-ff99-449c-ba6e-309ced8e5726
-begin
-	placement_f = @bind placement_filter NumberField(1:8; default = 3)
-	md"""
-	### Select only partcicipants that took top $(placement_f) spots
-	"""
-end
+# ╔═╡ 5bd5b26a-d483-49ef-b14f-b856d4b328a9
+viz.Viz.freq_simple(rd.items.Item; limit=graph_limit, icon_kind=:item)
 
-# ╔═╡ 64954f9d-8540-46fb-b9ac-7618f6c683b1
-@bind refresh_button Button("Refresh data")
-
-# ╔═╡ 19a275ae-6c7b-4301-b5b5-fac45825e621
-begin
-	refresh_button
-	
-	@time rd = riot.Riot.import_all_data(n_days, placement_filter)
-	
-	md"""
-	##### Fetched matches for $(n_days) days
-
-	##### Got $(length(rd.participants.PUUID)) match results
-	##### Got $(length(unique(rd.participants.PUUID))) participants
-	##### Got $(length(unique(rd.matches.MatchID))) matches
-	"""
-end
-
-# ╔═╡ 5bbd2c5f-3a89-419f-8936-f063c853fd43
-begin
-	all_traits = filter((t)->!startswith(t, "TFTTutorial"), unique(rd.traits.Trait))
-	
-	md"""
-	  ##### Found $(length(all_traits)) total traits
-	"""	
-end
-
-# ╔═╡ d89ed438-0339-4c06-b5a9-cc5f78f0cc4b
-begin
-	champ_rarity = filter((r) -> r.CharacterID != "TrainerDragon", unique(select(rd.units, [:CharacterID, :Rarity])))
-	champ_cost = Dict(
-		r.CharacterID => r.Rarity
-		for r in eachrow(champ_rarity)
-	)
-	md"Champ cost table"
-end
-
-# ╔═╡ 5069a831-7a20-4534-83ba-095212ebdef8
-begin
-	items_limit_f = @bind items_graph_limit Slider(5:50; default = 10)
-	md"""
-	### Show $(items_limit_f) popular items
-	"""
-end
-
-# ╔═╡ bf9b68cd-5e0a-4d9f-9486-a8a09e5adb58
-begin
-	items_viz = viz.Viz.freq_simple(rd.items.Item; limit=items_graph_limit, icon_kind=:item)
-	
-	
-	md"""
-	## Popular $(items_graph_limit) items
-	$(items_viz)
-	"""
-end
-
-# ╔═╡ 744599ac-f0b4-404e-8aa7-890196210dcc
-begin
-	comp_limit_f = @bind comp_graph_limit Slider(1:5; default = 2)
-	md"""
-	### Select $(comp_limit_f) traits for comp graph
-	"""
-end
-
-# ╔═╡ 26e9433d-c599-4a83-8a8a-49cc7b31c0b1
+# ╔═╡ 03bc4f2f-3bf9-4c01-9c00-fabda1bcd793
 begin
 	sorted_traits = sort(rd.traits, :NumUnits, rev=true)
 	gtdf = groupby(sorted_traits, [:MatchID, :PUUID])
@@ -133,7 +57,7 @@ begin
 	comp_pairs = []
 
 	for g in gtdf 
-		pair = first(g, comp_graph_limit)
+		pair = first(g, 2)
 		push!(comp_pairs, pair.Trait)
 	end
 
@@ -145,122 +69,13 @@ begin
 	"""
 end
 
-# ╔═╡ 14fb0cd0-8a18-458a-b1f9-992ef46108f2
+# ╔═╡ 2d2ebbd3-d4ea-4b56-ad5d-b09c50582518
 begin
-	trait_sel = @bind current_traits viz.Viz.FancyMultiSelect(sort(all_traits); icon_kind=:trait)
-
+	aug_graph = viz.Viz.freq_simple(rd.augments.Augment; limit=graph_limit, icon_kind=:augment)
 	md"""
-	## Select your traits:
-	$(trait_sel)
+	## Popular augments
+	$(aug_graph)
 	"""
-end
-
-# ╔═╡ 9e4f28be-a462-4580-87da-5b9ef34dcd93
-if current_traits !== missing
-	@bind trait_power viz.Viz.FancyOptionPowerSelector(current_traits)
-else
-	waveform
-end
-
-# ╔═╡ 7f472eeb-e3d2-4174-b19a-b10e3904e96e
-if trait_power !== missing
-	trait_power_labels = [
-		md"##### $(viz.Viz.render_icon(String(t), :trait)) $(String(t)) - $(p)"
-		for (t, p) in Dict(pairs(trait_power))
-	]
-	md"""
-	  ##### Looking for comp with following traits
-	  $(trait_power_labels)
-	"""
-else
-	waveform
-end
-
-# ╔═╡ 4f0c62ad-90e6-4055-92fd-51ef2aa85e0e
-if trait_power !== missing &&
-	rd !== missing
-	
-	cdf = innerjoin(rd.units, rd.traits, rd.participants, on = [:MatchID, :PUUID])
-	
-	trait_filter = Dict(String(k) => v for (k, v) in Dict(pairs(trait_power)))
-	all_champs = unique(rd.units.CharacterID)
-	if length(trait_filter) > 0
-		filtered_df = filter((r)-> 
-								r.Trait in keys(trait_filter) &&
-								r.NumUnits >= trait_filter[r.Trait],			
-								cdf)
-		all_champs = unique(filtered_df.CharacterID)
-	end
-
-	all_champs = filter((c) -> c != "TrainerDragon", all_champs)
-	all_champs = sort(all_champs, by=(c)->champ_cost[c])
-
-	md"""
-	  ##### Found $(length(all_champs)) total champions
-	"""
-else
-	waveform
-end
-
-# ╔═╡ 45130875-f0a3-4c33-93b2-fe93d8397c2e
-begin
-	champ_sel = @bind current_champs viz.Viz.FancyMultiSelect(all_champs, champ_cost_dict = champ_cost)
-	limit_slider = @bind graph_h_limit Slider(5:100;default=10)
-
-	md"""
-	## Select your champions:
-	$(champ_sel)
-
-	## Limit graph output: 
-	$(limit_slider)
-	"""
-end
-
-# ╔═╡ 1771bc71-8d82-424d-8406-bf4d2e57d611
-if current_champs !== missing
-	df = innerjoin(rd.units, rd.traits, rd.participants, on = [:MatchID, :PUUID])
-	if length(trait_filter) > 0
-		df = filter((r)-> 
-						r.Trait in keys(trait_filter) &&
-						r.NumUnits >= trait_filter[r.Trait],
-						df)
-	end
-	
-	groups = groupby(df, [:MatchID, :PUUID])
-	groups = filter(g->issubset(current_champs, g.CharacterID), groups)
-	other_champs = []
-	for g in groups
-		for c in g.CharacterID
-			if !(c in current_champs)
-				push!(other_champs, c)
-			end
-		end
-	end
-
-    champ_plot = viz.Viz.freq_simple(other_champs; limit = graph_h_limit)
-	
-	md"""
-	#### Selected champs:
-	$(map(viz.Viz.render_icon, current_champs))
-	
-	### $(graph_h_limit) Popular champion choices:
-	$(champ_plot)
-	"""
-else
-	waveform
-end
-
-# ╔═╡ 61fdd2b2-aec1-4249-93c9-88fc3a5b9fa3
-if current_champs !== missing
-	renders = map((c)->viz.Viz.render_champ_items(c, rd.items), current_champs)
-
-	md"""
-	  ## Popular items for selected champions:
-	
-	  $(renders)
-	"""
-else
-	waveform
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -283,11 +98,9 @@ PlutoSliderServer = "2fc8631c-6f24-4c5b-bca7-cbb509c42db4"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"
 PyPlot = "d330b81b-6aea-500a-939a-2ce795aea3ee"
-Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [compat]
 DataFrames = "~1.3.4"
-FreqTables = "~0.4.5"
 HypertextLiteral = "~0.9.4"
 PlutoUI = "~0.7.39"
 """
@@ -381,9 +194,9 @@ version = "0.7.0"
 
 [[deps.ColorTypes]]
 deps = ["FixedPointNumbers", "Random"]
-git-tree-sha1 = "0f4e115f6f34bbe43c19751c90a38b2f380637b9"
+git-tree-sha1 = "eb7f0f8307f71fac7c606984ea5fb2817275d6e4"
 uuid = "3da002f7-5984-5a60-b8a6-cbb66c0b333f"
-version = "0.11.3"
+version = "0.11.4"
 
 [[deps.Colors]]
 deps = ["ColorTypes", "FixedPointNumbers", "Reexport"]
@@ -933,9 +746,9 @@ version = "0.11.13"
 
 [[deps.Parsers]]
 deps = ["Dates"]
-git-tree-sha1 = "1285416549ccfcdf0c50d4997a94331e88d68413"
+git-tree-sha1 = "0044b23da09b5608b4ecacb4e5e6c6332f833a7e"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
-version = "2.3.1"
+version = "2.3.2"
 
 [[deps.Pipe]]
 git-tree-sha1 = "6842804e7867b115ca9de748a0cf6b364523c16d"
@@ -1265,27 +1078,14 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 """
 
 # ╔═╡ Cell order:
-# ╟─7d3b92bc-e204-11ec-1da7-f5f3d36f2b35
-# ╟─3731faa2-4d9f-4d98-b095-781a7c2464c1
-# ╟─456cc811-c813-4258-9dc3-18a0e8a7ae8a
-# ╟─21f98140-fa1d-4092-93ae-3947f8ad6694
-# ╟─987ddc96-f47f-4244-8e93-696b9acd4a07
-# ╟─3830b19e-3365-4f30-9e93-3304fe5a345b
-# ╟─80a9b48a-ff99-449c-ba6e-309ced8e5726
-# ╟─64954f9d-8540-46fb-b9ac-7618f6c683b1
-# ╟─19a275ae-6c7b-4301-b5b5-fac45825e621
-# ╟─5bbd2c5f-3a89-419f-8936-f063c853fd43
-# ╟─d89ed438-0339-4c06-b5a9-cc5f78f0cc4b
-# ╟─5069a831-7a20-4534-83ba-095212ebdef8
-# ╟─bf9b68cd-5e0a-4d9f-9486-a8a09e5adb58
-# ╟─744599ac-f0b4-404e-8aa7-890196210dcc
-# ╟─26e9433d-c599-4a83-8a8a-49cc7b31c0b1
-# ╟─14fb0cd0-8a18-458a-b1f9-992ef46108f2
-# ╟─9e4f28be-a462-4580-87da-5b9ef34dcd93
-# ╟─7f472eeb-e3d2-4174-b19a-b10e3904e96e
-# ╟─4f0c62ad-90e6-4055-92fd-51ef2aa85e0e
-# ╟─45130875-f0a3-4c33-93b2-fe93d8397c2e
-# ╟─1771bc71-8d82-424d-8406-bf4d2e57d611
-# ╟─61fdd2b2-aec1-4249-93c9-88fc3a5b9fa3
+# ╟─4e661396-f1e4-11ec-0fcf-03684abf11f0
+# ╟─0c246731-f574-4659-8396-7a848475bec9
+# ╟─1bf1fdca-959b-436c-b9d2-92feacddc04f
+# ╟─a440d4bb-8f74-4bf3-8537-3031584437e6
+# ╟─37edb2b7-bf84-4758-8d6a-808496455aef
+# ╟─6d7514f3-6e0d-4453-9247-57d7a935efe5
+# ╟─5bd5b26a-d483-49ef-b14f-b856d4b328a9
+# ╟─03bc4f2f-3bf9-4c01-9c00-fabda1bcd793
+# ╟─2d2ebbd3-d4ea-4b56-ad5d-b09c50582518
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
