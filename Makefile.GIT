@@ -1,0 +1,17 @@
+setup-git:
+	git config --global user.email "$(GIT_EMAIL)"
+	git config --global user.name "$(GIT_NAME)"
+
+PUBLIC_URL = https://$(GH_TOKEN)@github.com/Gonzih/tft-meta-rendered.git
+setup-git:
+	git clone -b main $(PUBLIC_URL) public
+
+copy-rendered:
+	cp -f notebooks/*.html public/
+
+publish: copy-rendered
+	cd public \
+	&& git add  . \
+	&& (git commit -a -m "Blog updated at $(shell date)"  || echo "Nothing to commit") \
+	&& git push \
+	&& cd ..

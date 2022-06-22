@@ -55,3 +55,10 @@ jobs:
 
       - run: make docker-run-export
       - run: make docker-run-export-notebooks
+
+      - name: publish
+        run: make setup-git public publish
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GIT_NAME: Max Gonzih via GH Actions
+          GIT_EMAIL: gonzih@gmail.com
