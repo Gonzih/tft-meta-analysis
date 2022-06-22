@@ -41,4 +41,16 @@ jobs:
     needs: build
     steps:
       - uses: actions/checkout@v2
-      - run: make docker-pull-public docker-run-export-notebooks
+
+      - name: Cache Notebooks Cache
+        id: cache-notebooks-cache
+        uses: actions/cache@v3
+        with:
+          path: notebooks/cache
+          key: notebooks-cache
+
+      - run: du -hs notebooks/cache
+      - run: make chmod-data-cache
+
+      - run: make docker-run-export
+      - run: make docker-run-export-notebooks
