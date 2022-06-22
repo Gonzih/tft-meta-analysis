@@ -1,6 +1,8 @@
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/Gonzih/tft-meta-analysis/v0.2.2?urlpath=pluto%2Fopen%3Fpath%3Dcomp_selector.jl)
 
-# Running
+# [Rendered version](https://spontaneous-stroopwafel-0c311e.netlify.app/meta.html)
+
+# Running locally
 
 ## Docker
 

@@ -54,6 +54,7 @@ jobs:
       - run: make chmod-data-cache
 
       - run: make docker-run-export
+      - run: chmod 777 -R notebooks
       - run: make docker-run-export-notebooks
 
       - name: publish

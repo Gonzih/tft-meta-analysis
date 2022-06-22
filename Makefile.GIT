@@ -2,8 +2,12 @@ setup-git:
 	git config --global user.email "$(GIT_EMAIL)"
 	git config --global user.name "$(GIT_NAME)"
 
+ifdef GH_TOKEN
 PUBLIC_URL = https://$(GH_TOKEN)@github.com/Gonzih/tft-meta-rendered.git
-setup-git:
+else
+PUBLIC_URL = git@github.com:Gonzih/tft-meta-rendered.git
+endif
+public:
 	git clone -b main $(PUBLIC_URL) public
 
 copy-rendered:
