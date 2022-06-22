@@ -1,5 +1,6 @@
 notebooks/.ipynb_checkpoints
 .env
 notebooks/cache
+notebooks/*.html
 *.tar.bz2
 public/
