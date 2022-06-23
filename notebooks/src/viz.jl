@@ -93,6 +93,7 @@ augmentmappings = Dict(
 function mapaugmentname(s)
     s = replace(
         s,
+        "Augment_" => "",
         "Diversify" => "TriForce", # not sure abotu this one
         "ForceOfNature" => "NewRecruit", # should be right?
         "BlueBattery2" => "BlueBattery",
@@ -100,9 +101,12 @@ function mapaugmentname(s)
         "TomeOfTraits" => "AncientArchives",
         "Pandorass" => "PandorasItems",
         "MikaelsGift" => "IntercosmicGifts",
-        "Augment_BruiserEmblem" => "BruiserCrest",
-        "Augment_BruiserTrait" => "BruiserHeart",
-        "Augment_AssasinTrait" => "AssasinHeart",
+        "BruiserEmblem" => "BruiserCrest",
+        "BruiserTrait" => "BruiserHeart",
+        "AssassinEmblem" => "AssassinCrest",
+        "AssassinTrait" => "AssassinHeart",
+        "EvokerTrait" => "EvokerHeart",
+        "EvokerEmblem" => "EvokerCrest",
         "Augment_Ragewing" => "",
         "Augment_Bruiser" => "",
         "Augment_Swiftshot" => "",
@@ -110,8 +114,6 @@ function mapaugmentname(s)
         "Emblem2" => "Crest",
         "Emblem3" => "Crown",
         "RevelEmblem2" => "RevelCrest",
-        "Augment_RevelParty" => "Party",
-        "Augment_" => "",
         "Emblem" => "Crest",
         "CavalierForAllUnits" => "CavalierUnity",
         "MaxLevel10" => "LevelUp!",
@@ -119,6 +121,15 @@ function mapaugmentname(s)
         "GuildLootHR" => "LootMaster",
         "RevelEmblem2" => "RevelCrown",
         "ScalescornTrait" => "ScalescornHeart",
+        "RevelParty" => "Party",
+        "PersonalTrainer" => "PersonalTraining",
+        "AssassinCutthroat" => "Cutthroat",
+        "DragonmancerInspire" => "Inspire",
+        "BruiserTitanicStrength" => "TitanicStrength",
+        "RagewingScorch" => "Scorch",
+        "ShapeshifterBeastsDen" => "BeastsDen",
+        "WarriorTiamat" => "Tiamat",
+        "ThriftShop" => "ThinkFast",
         "HR" => "",
     )
 
