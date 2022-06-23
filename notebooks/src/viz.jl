@@ -91,8 +91,50 @@ augmentmappings = Dict(
 )
 
 function mapaugmentname(s)
-    s = replace(
-        s,
+    traitlist = ["Assassin",
+                 "Dragonmancer",
+                 "Guardian",
+                 "Jade",
+                 "Mage",
+                 "Mirage",
+                 "Shapeshifter",
+                 "Shimmerscale",
+                 "Swiftshot",
+                 "Tempest",
+                 "Warrior",
+                 "Whispers",
+                 "Astral",
+                 "Bruiser",
+                 "Evoker",
+                 "Legend",
+                 "Mystic",
+                 "Trainer",
+                 "Cavalier",
+                 "Ragewing",
+                 "Scalescorn",
+                 "Revel",
+                 "Cannoneer",
+                 "Guild"]
+
+
+    for pair in [("Emblem2", "Crown"), ("Emblem", "Crest"), ("Trait2", "Crest"), ("Trait", "Heart")]
+        pre = pair[1]
+        post = pair[2]
+
+        replacements = Dict("$(t)$(pre)" => "$(t)$(post)" for t in traitlist)
+        s = replace(s, replacements...)
+    end
+
+    not_to_replace = ["Heart", "Crest", "Crown"]
+    should_replace = !any((k)->occursin(k, s), not_to_replace)
+
+    if should_replace
+        augment_replacements = Dict("Augment_$(t)" => "" for t in traitlist)
+        s = replace(s, augment_replacements...)
+    end
+
+
+    replacements = Dict(
         "Augment_" => "",
         "Diversify" => "TriForce", # not sure abotu this one
         "ForceOfNature" => "NewRecruit", # should be right?
@@ -101,41 +143,28 @@ function mapaugmentname(s)
         "TomeOfTraits" => "AncientArchives",
         "Pandorass" => "PandorasItems",
         "MikaelsGift" => "IntercosmicGifts",
-        "BruiserEmblem" => "BruiserCrest",
-        "BruiserTrait" => "BruiserHeart",
-        "AssassinEmblem" => "AssassinCrest",
-        "AssassinTrait" => "AssassinHeart",
-        "EvokerTrait" => "EvokerHeart",
-        "EvokerEmblem" => "EvokerCrest",
-        "Augment_Ragewing" => "",
-        "Augment_Bruiser" => "",
-        "Augment_Swiftshot" => "",
-        "Augment_Shapeshifter" => "",
-        "Emblem2" => "Crest",
-        "Emblem3" => "Crown",
-        "RevelEmblem2" => "RevelCrest",
-        "Emblem" => "Crest",
-        "CavalierForAllUnits" => "CavalierUnity",
+        "ForAllUnits" => "CavalierUnity",
         "MaxLevel10" => "LevelUp!",
         "Twins" => "DoubleTrouble",
-        "GuildLootHR" => "LootMaster",
-        "RevelEmblem2" => "RevelCrown",
-        "ScalescornTrait" => "ScalescornHeart",
+        "Loot" => "LootMaster",
         "RevelParty" => "Party",
         "PersonalTrainer" => "PersonalTraining",
-        "AssassinCutthroat" => "Cutthroat",
-        "DragonmancerInspire" => "Inspire",
-        "BruiserTitanicStrength" => "TitanicStrength",
-        "RagewingScorch" => "Scorch",
-        "ShapeshifterBeastsDen" => "BeastsDen",
         "WarriorTiamat" => "Tiamat",
         "ThriftShop" => "ThinkFast",
+        "Conference" => "MageConference",
+        "Spending" => "RecklessSpending",
+        "Traitless" => "BuiltDifferent",
+        "FuturePeepers" => "FutureSight",
+        "GrabBag2" => "ComponentsGrabBag",
         "HR" => "",
     )
 
+    s = replace(s, replacements...)
+
     s = replace(
         s,
-        "UrfsItemGrabBag1" => "UrfsGrabBag1",
+        "UrfsComponentsGrabBag" => "UrfsGrabBag2",
+        "UrfsItemGrabBag" => "UrfsGrabBag",
     )
 
     "$(s)"
