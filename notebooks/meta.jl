@@ -39,7 +39,7 @@ end
 # ╔═╡ ebd2225e-c774-4991-bba7-c50ce3cf82b4
 begin
 	item_df = innerjoin(rd.items, rd.participants, on = [:MatchID, :PUUID])
-	item_graph = viz.Viz.winrate_simple(item_df, :Item, limit=graph_limit, icon_kind=:item)
+	item_graph = viz.Viz.winrate_simple(item_df, :Item, limit=graph_limit, icon_kind=:item, blacklist=["TrainerSnax"])
 	md"""
 	## Items winrate
 	$(item_graph)
@@ -59,7 +59,7 @@ end
 # ╔═╡ 61786d69-c9bc-4a6f-99b7-78741387c765
 begin
 	units_df = innerjoin(rd.units, rd.participants, on = [:MatchID, :PUUID])
-	champ_graph = viz.Viz.winrate_simple(units_df, :CharacterID, limit=graph_limit, icon_kind=:champ, champ_cost_dict=champ_cost)
+	champ_graph = viz.Viz.winrate_simple(units_df, :CharacterID, limit=graph_limit, icon_kind=:champ, champ_cost_dict=champ_cost, blacklist=["TrainerDragon"])
 	
 	md"""
 	## Champ winrate

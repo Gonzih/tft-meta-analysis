@@ -371,7 +371,7 @@ function calc_winrates(df, col)
 	  winrates
 end
 
-function winrate_simple(df, col; limit = 10, icon_kind = :champ, champ_cost_dict = Dict(), total_cutoff = 0.005)
+function winrate_simple(df, col; limit = 10, icon_kind = :champ, champ_cost_dict = Dict(), total_cutoff = 0.005, blacklist = [])
     winrates = calc_winrates(df, col)
 
     total_rows = nrow(df)
@@ -413,7 +413,7 @@ function winrate_simple(df, col; limit = 10, icon_kind = :champ, champ_cost_dict
             </div>
             """)
 
-            for r in winrates
+            for r in winrates if !(r[1] in blacklist)
         ]
 
         @htl("""
