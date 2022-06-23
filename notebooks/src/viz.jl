@@ -187,23 +187,23 @@ function icon_for(s, kind = :champ; set = "7")
     end
 end
 
-function render_pair_icons(pair)
+function render_pair_icons(pair, pair_kinds)
     kind = :pair
     icons = []
 
     pair = split(pair, "|")
 
-    for s in pair
-        img = render_icon(s, :trait)
+    for (s, icon_type) in zip(pair, pair_kinds)
+        img = render_icon(s, icon_type)
         push!(icons, img)
     end
 
     icons
 end
 
-function render_icon(s, kind = :champ, champ_cost_dict = Dict())
+function render_icon(s, kind = :champ, champ_cost_dict = Dict(), pair_kinds = (:trait, :trait))
     if kind == :pair
-        render_pair_icons(s)
+        render_pair_icons(s, pair_kinds)
     else
         src = icon_for(s, kind)
         klass = "$(String(kind))_icon icon"
@@ -387,8 +387,9 @@ function calc_winrates(df, col)
 	  unique_values = unique(df[!, col])
 
 	  calc_winrate = function(v)
-		    total = nrow(filter((r)->r[col] == v, df))
-		    wins =  nrow(filter((r)->r[col] == v && r.Placement == 1, df))
+        all_rows = filter((r)->r[col] == v, df)
+		    total = nrow(all_rows)
+		    wins =  nrow(filter((r)->r.Placement == 1, all_rows))
 
 		    (v, wins/total*100, wins, total)
 	  end
@@ -400,19 +401,13 @@ function calc_winrates(df, col)
 	  winrates
 end
 
-function winrate_simple(df, col; limit = 10, icon_kind = :champ, champ_cost_dict = Dict(), total_cutoff = 0.005, blacklist = [])
+function winrate_simple(df, col; limit = 10, icon_kind = :champ, champ_cost_dict = Dict(), total_cutoff = 0.005, blacklist = [], pair_kinds = (:trait, :trait))
     winrates = calc_winrates(df, col)
 
     total_rows = nrow(df)
     filter!((r)->r[4]/total_rows>total_cutoff, winrates)
 
     winrates = first(winrates, limit)
-
-    onclick = (s) -> ""
-
-    if icon_kind == :champ
-        onclick = (s) -> "document.getElementById('champion_selector_div').addOption('$(s)');"
-    end
 
     base_width = 40
     icon_width = "$(base_width)px"
@@ -428,8 +423,8 @@ function winrate_simple(df, col; limit = 10, icon_kind = :champ, champ_cost_dict
     if nrow(df) > 0
         inputs = [
             @htl("""
-            <div class="centered" style="margin-bottom:10px; cursor: pointer;" onclick=$(onclick(r[1]))>
-              $(render_icon(r[1], icon_kind, champ_cost_dict))
+            <div class="centered" style="margin-bottom:10px; cursor: pointer;">
+              $(render_icon(r[1], icon_kind, champ_cost_dict, pair_kinds))
             </div>
             <div class="centered" style="margin-bottom:10px;">
               <progress value=$(r[2]) max=$(max_v) style='width: 100%' />

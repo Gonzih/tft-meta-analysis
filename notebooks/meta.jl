@@ -115,6 +115,26 @@ begin
 	"""
 end
 
+# ╔═╡ c35fcb0a-ad22-488d-92e0-32b53e0bcd11
+begin
+    champ_items_df = innerjoin(rd.items, rd.participants, on = [:MatchID, :PUUID])
+
+	filter!((r)-> r.Item != "TrainerSnax" && r.CharacterID != "TrainerDragon", champ_items_df)
+
+	function char_item_pair(r)
+		"$(r.CharacterID)|$(r.Item)"
+	end
+
+	champ_items_df.Pair = char_item_pair.(eachrow(champ_items_df))
+
+	champ_item_graph = viz.Viz.winrate_simple(champ_items_df, :Pair, limit=graph_limit, icon_kind=:pair, pair_kinds=(:champ, :item), total_cutoff=0.001)
+	
+	md"""
+	## Champ + Item winrate
+	$(champ_item_graph)
+	"""
+end
+
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
@@ -462,5 +482,6 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╟─0fdccd3a-8d8a-4df3-bdd1-decf89482c10
 # ╟─03bc4f2f-3bf9-4c01-9c00-fabda1bcd793
 # ╟─37768219-5254-4f0e-a6f0-ea98f595bbe0
+# ╟─c35fcb0a-ad22-488d-92e0-32b53e0bcd11
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
