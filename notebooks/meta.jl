@@ -115,46 +115,43 @@ begin
 	"""
 end
 
-# ╔═╡ c35fcb0a-ad22-488d-92e0-32b53e0bcd11
-begin
-    champ_items_df = innerjoin(rd.items, rd.participants, on = [:MatchID, :PUUID])
+# ╔═╡ 6d5cea0b-ea46-4f39-98c8-6eb25e3dac99
+function render_column_pair_winrate(columns, dfs; join_on=[:MatchID, :PUUID], title="Winrate", pair_kinds=(:trait, :trait), total_cutoff=0.005)
+    df = innerjoin(dfs..., on = join_on)
 
-	filter!((r)-> r.Item != "TrainerSnax" && r.CharacterID != "TrainerDragon", champ_items_df)
-
-	function char_item_pair(r)
-		"$(r.CharacterID)|$(r.Item)"
+	function gen_pair(r)		
+		join(r, "|")
 	end
 
-	champ_items_df.Pair = char_item_pair.(eachrow(champ_items_df))
+	df.Pair = map(gen_pair, eachrow(df[!, columns]))
 
-	champ_item_graph = viz.Viz.winrate_simple(champ_items_df, :Pair, limit=graph_limit, icon_kind=:pair, pair_kinds=(:champ, :item), total_cutoff=0.001)
+	wr_graph = viz.Viz.winrate_simple(df, :Pair, limit=graph_limit, icon_kind=:pair, pair_kinds=pair_kinds, total_cutoff=total_cutoff)
 	
 	md"""
-	## Champ + Item winrate
-	$(champ_item_graph)
+	## $(title)
+	$(wr_graph)
 	"""
+end
+
+# ╔═╡ c35fcb0a-ad22-488d-92e0-32b53e0bcd11
+begin
+	filter!((r)-> r.Item != "TrainerSnax" && r.CharacterID != "TrainerDragon", rd.items)
+
+	render_column_pair_winrate([:CharacterID, :Item], [rd.items, rd.participants]; pair_kinds = (:champ, :item), title = "Champ + Item winrate", total_cutoff = 0.001)
 end
 
 # ╔═╡ 04854ece-0e56-461b-af45-333501287314
 begin
-    champ_augs_df = innerjoin(rd.units, rd.augments, rd.participants, on = [:MatchID, :PUUID])
+	filter!((r)-> r.CharacterID != "TrainerDragon", rd.units)
 
-	filter!((r)-> r.CharacterID != "TrainerDragon", champ_augs_df)
+	render_column_pair_winrate([:CharacterID, :Augment], [rd.items, rd.augments, rd.participants]; pair_kinds = (:champ, :augment), title = "Champ + Augment winrate", total_cutoff = 0.001)
+end
 
-	function char_aug_pair(r)
-		"$(r.CharacterID)|$(r.Augment)"
-	end
+# ╔═╡ cdeb4caa-aa73-48b3-9513-d4e883df210a
+begin
+	filter!((r)-> r.CharacterID != "TrainerDragon", rd.units)
 
-	champ_augs_df.Pair = char_aug_pair.(eachrow(champ_augs_df))
-
-	champ_augs_df
-
-	champ_aug_graph = viz.Viz.winrate_simple(champ_augs_df, :Pair, limit=graph_limit, icon_kind=:pair, pair_kinds=(:champ, :augment), total_cutoff=0.005)
-	
-	md"""
-	## Champ + Augment winrate
-	$(champ_aug_graph)
-	"""
+	render_column_pair_winrate([:CharacterID, :Trait], [rd.items, rd.traits, rd.participants]; pair_kinds = (:champ, :trait), title = "Champ + Trait winrate", total_cutoff = 0.001)
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -504,7 +501,9 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╟─0fdccd3a-8d8a-4df3-bdd1-decf89482c10
 # ╟─03bc4f2f-3bf9-4c01-9c00-fabda1bcd793
 # ╟─37768219-5254-4f0e-a6f0-ea98f595bbe0
+# ╟─6d5cea0b-ea46-4f39-98c8-6eb25e3dac99
 # ╟─c35fcb0a-ad22-488d-92e0-32b53e0bcd11
 # ╟─04854ece-0e56-461b-af45-333501287314
+# ╟─cdeb4caa-aa73-48b3-9513-d4e883df210a
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
