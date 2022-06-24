@@ -19,4 +19,4 @@ unpack-data:
 chmod-data-cache:
 	chmod 777 -R notebooks/data notebooks/cache
 
-scrape-all: clear-cache docker-run-scrape
+scrape-all: clear-cache scrape

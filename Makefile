@@ -18,3 +18,7 @@ export-notebooks:
 
 server:
 	cd notebooks && $(JULIA) scripts/server.jl
+
+setup-julia:
+	sudo pip install jill
+	jill install

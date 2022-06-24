@@ -25,6 +25,7 @@ jobs:
 
       - run: echo "RIOT_API_KEY=${{ secrets.RIOT_API_KEY }}" > .env
       - run: make chmod-data-cache
+      - run: make setup-julia
       - run: make scrape-all
 
   docker-public:
@@ -46,7 +47,8 @@ jobs:
       - run: echo "RIOT_API_KEY=${{ secrets.RIOT_API_KEY }}" > .env
       - run: make chmod-data-cache
 
-      - run: make docker-run-export pack-cache pack-data
+      - run: make setup-julia
+      - run: make export pack-cache pack-data
       - run: make build-public-image
 
       - name: Login to Docker Hub
@@ -77,8 +79,9 @@ jobs:
       - run: touch notebooks/meta.html
       - run: chmod 777 notebooks/*.html
 
-      - run: make docker-run-export
-      - run: make docker-run-export-notebooks
+      - run: make setup-julia
+      - run: make export
+      - run: make export-notebooks
 
       - name: publish
         run: make setup-git public publish
