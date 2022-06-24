@@ -151,7 +151,24 @@ end
 begin
 	filter!((r)-> r.CharacterID != "TrainerDragon", rd.units)
 
-	render_column_pair_winrate([:CharacterID, :Trait], [rd.items, rd.traits, rd.participants]; pair_kinds = (:champ, :trait), title = "Champ + Trait winrate", total_cutoff = 0.001)
+    _traits_df = innerjoin(rd.traits, rd.participants, on = [:MatchID, :PUUID])
+	sort!(_traits_df, :NumUnits, rev=true)
+	trait_groups = groupby(_traits_df, [:MatchID, :PUUID])
+
+	top_trait_df = DataFrame()
+
+	for g in trait_groups
+		top_trait = first(g)
+		df = DataFrame(
+			Trait = top_trait.Trait,
+			MatchID = top_trait.MatchID,
+			NumUnits = top_trait.NumUnits,
+			PUUID = top_trait.PUUID,
+		)
+		append!(top_trait_df, df)
+	end
+
+	render_column_pair_winrate([:Trait, :CharacterID], [rd.units, top_trait_df, rd.participants]; pair_kinds = (:trait, :champ), title = "Main trait + Champ winrate", total_cutoff = 0.001)
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
