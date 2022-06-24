@@ -4,6 +4,6 @@ Pkg.instantiate()
 
 using PlutoSliderServer
 
-for nb in ["/notebooks/meta.jl"]
+for nb in ["meta.jl"]
     PlutoSliderServer.export_notebook(nb)
 end
