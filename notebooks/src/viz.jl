@@ -91,6 +91,10 @@ augmentmappings = Dict(
 )
 
 function mapaugmentname(s)
+    if s == "Distancing"
+        s = "Exiles1"
+    end
+
     traitlist = ["Assassin",
                  "Dragonmancer",
                  "Guardian",
@@ -156,6 +160,7 @@ function mapaugmentname(s)
         "Traitless" => "BuiltDifferent",
         "FuturePeepers" => "FutureSight",
         "GrabBag2" => "ComponentsGrabBag",
+        "Distancing" => "Exiles",
         "HR" => "",
     )
 
