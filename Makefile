@@ -21,4 +21,4 @@ server:
 
 setup-julia:
 	yes | sudo pip install jill
-	jill install
+	jill install --confirm
