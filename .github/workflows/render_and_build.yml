@@ -1,9 +1,11 @@
-name: CI
+name: Render and Build
 
 on:
   push:
     branches:
     - main
+  schedule:
+    - cron: '0 */12 * * *'
 
 jobs:
   docker-public:
