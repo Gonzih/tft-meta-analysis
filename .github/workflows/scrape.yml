@@ -1,0 +1,27 @@
+name: Scrape
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 */6 * * *'
+
+jobs:
+  scrape:
+    name: Scrape
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Cache Notebooks Cache
+        id: cache-notebooks-cache
+        uses: actions/cache@v3
+        with:
+          path: notebooks/cache
+          key: notebooks-cache
+      - run: du -hs notebooks/cache
+
+      - run: echo "RIOT_API_KEY=${{ secrets.RIOT_API_KEY }}" > .env
+      - run: make chmod-data-cache
+      - run: make setup-julia
+      - run: make scrape-all
