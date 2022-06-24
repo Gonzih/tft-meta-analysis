@@ -38,12 +38,3 @@ docker-cp-from-public: clear-data
 
 docker-push-public:
 	docker push --all-tags $(PUBLIC_IMAGE_NAME)
-
-docker-run-scrape: build-docker-image
-	docker run $(DOCKER_V_ARGS) -t $(IMAGE_NAME) su -c "cd /notebooks && julia scripts/scrape.jl" julia
-
-docker-run-export: build-docker-image
-	docker run $(DOCKER_V_ARGS) -t $(IMAGE_NAME) su -c "cd /notebooks && julia scripts/export.jl" julia
-
-docker-run-export-notebooks:  build-docker-image
-	docker run $(DOCKER_V_ARGS) -t $(IMAGE_NAME) su -c "cd /notebooks && julia scripts/export_notebooks.jl" julia
