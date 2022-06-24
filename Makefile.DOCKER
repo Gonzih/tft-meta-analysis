@@ -34,7 +34,7 @@ docker-pull-public:
 	docker pull $(PUBLIC_IMAGE_NAME):latest
 
 docker-cp-from-public: clear-data
-	docker run -t $(PUBLIC_IMAGE_NAME) tar cvz /app/notebooks/data > /tmp/arch.tar
+	docker run $(PUBLIC_IMAGE_NAME) tar cvz /app/notebooks/data > /tmp/arch.tar
 	tar xvzf /tmp/arch.tar
 	mv -f app/notebooks/data/*.csv notebooks/data/
 	rm -rf app/ /tmp/arch.tar
