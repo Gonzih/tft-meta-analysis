@@ -20,5 +20,5 @@ server:
 	cd notebooks && $(JULIA) scripts/server.jl
 
 setup-julia:
-	sudo pip install jill
+	sudo pip install --yes jill
 	jill install
