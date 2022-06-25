@@ -5,7 +5,7 @@ using DataFrames
 
 println("Loading matches JSON")
 @time df = matches_df()
-println(describe(df.matches))
 
-println("Saving matches")
+dfrows = nrows(df.matches)
+println("Saving $(dfrows) matches")
 @time export_all_data(df)
