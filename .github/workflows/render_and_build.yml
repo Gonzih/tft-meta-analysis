@@ -20,14 +20,18 @@ jobs:
         uses: actions/cache@v3
         with:
           path: notebooks/cache
-          key: notebooks-cache
+          key: notebooks-cache-${{ github.sha }}
+          restore-keys: |
+            notebooks-cache-${{ github.sha }}
+            notebooks-cache-
+            notebooks-
       - run: du -hs notebooks/cache
 
       - run: echo "RIOT_API_KEY=${{ secrets.RIOT_API_KEY }}" > .env
       - run: make chmod-data-cache
 
       - run: make setup-julia
-      - run: make export pack-cache pack-data
+      - run: make export pack-data
       - run: make build-public-image
 
       - name: Login to Docker Hub
@@ -49,7 +53,11 @@ jobs:
         uses: actions/cache@v3
         with:
           path: notebooks/cache
-          key: notebooks-cache
+          key: notebooks-cache-${{ github.sha }}
+          restore-keys: |
+            notebooks-cache-${{ github.sha }}
+            notebooks-cache-
+            notebooks-
       - run: du -hs notebooks/cache
 
       - run: echo "RIOT_API_KEY=${{ secrets.RIOT_API_KEY }}" > .env
