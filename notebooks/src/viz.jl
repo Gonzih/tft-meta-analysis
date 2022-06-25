@@ -435,7 +435,7 @@ function winrate_simple(df, col; limit = 10, icon_kind = :champ, champ_cost_dict
               <progress value=$(r[2]) max=$(max_v) style='width: 100%' />
             </div>
             <div class="centered" style="margin-bottom:10px">
-              $(floor(r[2]))%
+              $(round(r[2], digits=1))%
             </div>
             <div class="centered" style="margin-bottom:10px">
               $(r[3])/$(r[4])
