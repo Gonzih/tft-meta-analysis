@@ -6,6 +6,6 @@ using DataFrames
 println("Loading matches JSON")
 @time df = matches_df()
 
-dfrows = nrows(df.matches)
+dfrows = nrow(df.matches)
 println("Saving $(dfrows) matches")
 @time export_all_data(df)
