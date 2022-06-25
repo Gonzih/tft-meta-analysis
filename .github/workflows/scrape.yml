@@ -18,9 +18,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: notebooks/cache
-          key: notebooks-cache-${{ github.sha }}-${{ github.run_id }}${{ github.run_number }}${{ github.run_attempt }}
+          key: notebooks-cache-${{ github.sha }}-${{ github.job }}${{ github.run_id }}${{ github.run_number }}${{ github.run_attempt }}
           restore-keys: |
-            notebooks-cache-${{ github.sha }}-${{ github.run_id }}${{ github.run_number }}${{ github.run_attempt }}
+            notebooks-cache-${{ github.sha }}-${{ github.job }}${{ github.run_id }}${{ github.run_number }}${{ github.run_attempt }}
             notebooks-cache-${{ github.sha }}-
             notebooks-cache-
             notebooks-
