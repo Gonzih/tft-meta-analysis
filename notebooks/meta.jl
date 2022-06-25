@@ -30,7 +30,7 @@ begin
 	rd = riot.Riot.import_all_data(7, 10)
 	md"""
 	#### Loaded $(length(unique(rd.matches.MatchID))) matches
-	#### Loaded $(length(unique(rd.participants.PUUID))) matches
+	#### Loaded $(length(unique(rd.participants.PUUID))) players
 	"""
 end
 
