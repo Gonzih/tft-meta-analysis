@@ -539,6 +539,9 @@ styles = @htl("""
 	justify-content: center;
 	align-items: center;
 }
+.edit_or_run {
+    display: none;
+}
 </style>
 Styles are here
 """)
