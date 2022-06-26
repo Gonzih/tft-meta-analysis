@@ -389,21 +389,21 @@ function freq_simple(coll; limit = 10, icon_kind = :champ, champ_cost_dict = Dic
 end
 
 function calc_winrates(df, col)
-	  unique_values = unique(df[!, col])
+    groups = groupby(df, [col])
 
-	  calc_winrate = function(v)
-        all_rows = filter((r)->r[col] == v, df)
-		    total = nrow(all_rows)
-		    wins =  nrow(filter((r)->r.Placement == 1, all_rows))
+    calc_winrate = function (g)
+        total = nrow(g)
+        wins = nrow(filter((r) -> r.Placement == 1, g))
+        v = first(g[!, col])
 
-		    (v, wins/total*100, wins, total)
-	  end
+        (v, wins / total * 100, wins, total)
+    end
 
-	  winrates = [calc_winrate(v) for v in unique_values]
+    winrates = [calc_winrate(g) for g in groups]
 
-	  sort!(winrates, by=(r)->r[2], rev=true)
+    sort!(winrates, by = (r) -> r[2], rev = true)
 
-	  winrates
+    winrates
 end
 
 function winrate_simple(df, col; limit = 10, icon_kind = :champ, champ_cost_dict = Dict(), total_cutoff = 0.005, blacklist = [], pair_kinds = (:trait, :trait))
