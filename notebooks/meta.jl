@@ -98,6 +98,20 @@ begin
 	"""
 end
 
+# ╔═╡ 77945cdc-3b02-4689-a257-0e2bcfb9c645
+begin
+	units_3s_df = innerjoin(rd.units, rd.participants, on = [:MatchID, :PUUID])
+
+	filter((r)->r.Tier == 3, units_3s_df)
+
+	champ_3s_graph = viz.Viz.winrate_simple(units_3s_df, :CharacterID, limit=graph_limit, icon_kind=:champ, champ_cost_dict=champ_cost, blacklist=["TrainerDragon"])
+
+	md"""
+	## 3 star champ winrate
+	$(champ_3s_graph)
+	"""
+end
+
 # ╔═╡ 0fdccd3a-8d8a-4df3-bdd1-decf89482c10
 begin
 	traits_df = innerjoin(rd.traits, rd.participants, on = [:MatchID, :PUUID])
@@ -547,6 +561,7 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╟─ebd2225e-c774-4991-bba7-c50ce3cf82b4
 # ╟─f6381caa-8655-440d-b0c6-dfa52c60f2f5
 # ╟─61786d69-c9bc-4a6f-99b7-78741387c765
+# ╟─77945cdc-3b02-4689-a257-0e2bcfb9c645
 # ╟─0fdccd3a-8d8a-4df3-bdd1-decf89482c10
 # ╟─03bc4f2f-3bf9-4c01-9c00-fabda1bcd793
 # ╟─37768219-5254-4f0e-a6f0-ea98f595bbe0
