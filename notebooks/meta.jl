@@ -27,7 +27,7 @@ viz.Viz.styles
 
 # ╔═╡ 37edb2b7-bf84-4758-8d6a-808496455aef
 begin
-	rd = riot.Riot.import_all_data(7, 10)
+	@time rd = riot.Riot.import_all_data(7, 10)
 	md"""
 	#### Loaded $(length(unique(rd.matches.MatchID))) matches
 	#### Loaded $(length(unique(rd.participants.PUUID))) players
