@@ -32,7 +32,7 @@ begin
 	@time rd = riot.Riot.import_all_data(7, 10)
 
 	md"""
-	#### $(dtnow)
+	#### $(dtnow) UTC
 	#### Loaded $(length(unique(rd.matches.MatchID))) matches
 	#### Loaded $(length(unique(rd.participants.PUUID))) players
 	"""
