@@ -12,6 +12,7 @@ begin
 	using DataFrames
 	using HypertextLiteral
 	using PlutoUI
+	using Dates
 	
 	"dependencies"
 end
@@ -27,8 +28,11 @@ viz.Viz.styles
 
 # ╔═╡ 37edb2b7-bf84-4758-8d6a-808496455aef
 begin
+	dtnow = Dates.format(Dates.now(), dateformat"e, u dd Y - HH:MM")
 	@time rd = riot.Riot.import_all_data(7, 10)
+
 	md"""
+	#### $(dtnow)
 	#### Loaded $(length(unique(rd.matches.MatchID))) matches
 	#### Loaded $(length(unique(rd.participants.PUUID))) players
 	"""
@@ -220,6 +224,7 @@ end
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 HypertextLiteral = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 
