@@ -24,7 +24,8 @@ export load_league,
     export_all_data,
     import_all_data,
     is_data_present,
-    download_data
+    download_data,
+    flatten
 
 function riot_get(routing, path; cache_key = "get", sleep_duration = 1)
     url = "https://$(routing).api.riotgames.com/$(path)"
@@ -63,6 +64,10 @@ end
 
 # SCRAPING FNS
 
+function flatten(coll)
+    collect(Iterators.flatten(coll))
+end
+
 function scrape_match(id)
     mdata = load_match(id)
     mdata
@@ -73,12 +78,12 @@ function scrape_summoner(data)
     sdata = load_summoner(id)
     puuid = sdata["puuid"]
     matches = load_matches_for(puuid)
-    map(scrape_match, matches)
+    matches
 end
 
 function scrape_league(l)
     ldata = load_league(l)
-    map(scrape_summoner, ldata["entries"])
+    flattten(map(scrape_summoner, ldata["entries"]))
 end
 
 function all_matches_from_cache()
