@@ -83,7 +83,7 @@ end
 
 function scrape_league(l)
     ldata = load_league(l)
-    flattten(map(scrape_summoner, ldata["entries"]))
+    flatten(map(scrape_summoner, ldata["entries"]))
 end
 
 function all_matches_from_cache()
