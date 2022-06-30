@@ -58,7 +58,7 @@ function load_matches_for(puuid)
 end
 
 function load_match(id)
-    riot_get("americas", "tft/match/v1/matches/$(id)"; cache_key = "match")
+    riot_get("americas", "tft/match/v1/matches/$(id)"; cache_key = "match", sleep_duration = 1.5)
 end
 
 
