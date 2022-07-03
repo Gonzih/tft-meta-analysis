@@ -19,6 +19,9 @@ export-notebooks:
 server:
 	cd notebooks && $(JULIA) scripts/server.jl
 
+cleanup:
+	cd notebooks && $(JULIA) scripts/cleanup.jl
+
 setup-julia:
 	sudo pip install jill
 	jill install --confirm
