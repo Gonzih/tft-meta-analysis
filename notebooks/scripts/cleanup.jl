@@ -4,4 +4,4 @@ using Main.Riot
 using DataFrames
 
 println("Removing old matches")
-@time rm_old_data(7)
+@time rm_old_data(14)
