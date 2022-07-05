@@ -30,4 +30,4 @@ jobs:
       - run: make chmod-data-cache
       - run: make setup-julia
       - run: make scrape-all
-      - run: make cleanup
+      # - run: make cleanup
