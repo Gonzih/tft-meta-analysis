@@ -21,7 +21,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: notebooks/cache
-          key: notebooks-cache-${{ github.sha }}-${{ github.job }}${{ github.run_id }}${{ github.run_number }}${{ github.run_attempt }}
+          key: render-notebooks-cache-${{ github.sha }}-${{ github.job }}${{ github.run_id }}${{ github.run_number }}${{ github.run_attempt }}
           restore-keys: |
             notebooks-cache-${{ github.sha }}-${{ github.job }}${{ github.run_id }}${{ github.run_number }}${{ github.run_attempt }}
             notebooks-cache-${{ github.sha }}-
@@ -33,6 +33,7 @@ jobs:
       - run: make chmod-data-cache
 
       - run: make setup-julia
+      - run: make cleanup
       - run: make export pack-data
       - run: make build-public-image
 
@@ -55,7 +56,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: notebooks/cache
-          key: notebooks-cache-${{ github.sha }}-${{ github.run_id }}${{ github.run_number }}${{ github.run_attempt }}
+          key: render-notebooks-cache-${{ github.sha }}-${{ github.run_id }}${{ github.run_number }}${{ github.run_attempt }}
           restore-keys: |
             notebooks-cache-${{ github.sha }}-${{ github.job }}${{ github.run_id }}${{ github.run_number }}${{ github.run_attempt }}
             notebooks-cache-${{ github.sha }}-
@@ -69,6 +70,7 @@ jobs:
       - run: chmod 777 notebooks/*.html
 
       - run: make setup-julia
+      - run: make cleanup
       - run: make export
       - run: make export-notebooks
 
