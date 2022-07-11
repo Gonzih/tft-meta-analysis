@@ -27,11 +27,24 @@ export load_league,
     download_data,
     flatten,
     is_date_less_than,
-    rm_old_data
+    rm_old_data,
+    current_region,
+    region_config
+
+function current_region()
+  get(ENV, "RIOT_REGION", "NA")
+end
+
+function region_config()
+    reg = current_region()
+    regions[reg]
+end
 
 function riot_get(routing, path; cache_key = "get", sleep_duration = 1)
     url = "https://$(routing).api.riotgames.com/$(path)"
-    cache_fname = "cache/$(cache_key)-$(bytes2hex(md5(url))).json"
+    region = current_region()
+    md5hash = bytes2hex(md5(url))
+    cache_fname = "cache/$(region)-$(cache_key)-$(md5hash).json"
 
     if !isfile(cache_fname)
         print("Loading $(url) -> $(cache_fname)\n")
@@ -51,11 +64,6 @@ regions = Dict(
     "NA"=>(region="na1", gateway="americas"),
     "CN"=>(region="cn1", gateway="asia"),
 )
-
-function region_config()
-    reg = get(ENV, "RIOT_REGION", "NA")
-    regions[reg]
-end
 
 function load_league(league)
     region = region_config().region
