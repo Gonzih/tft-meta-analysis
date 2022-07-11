@@ -43,7 +43,7 @@ end
 
 function all_match_files()
   region = current_region()
-  files = glob("$(region)-match-*.json", "cache/")
+  glob("$(region)-match-*.json", "cache/")
 end
 
 function riot_get(routing, path; cache_key = "get", sleep_duration = 1)
