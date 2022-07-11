@@ -47,20 +47,34 @@ function riot_get(routing, path; cache_key = "get", sleep_duration = 1)
     JSON.parse(open(f -> read(f, String), cache_fname))
 end
 
+regions = Dict(
+    "NA"=>(region="na1", gateway="americas"),
+    "CN"=>(region="cn1", gateway="asia"),
+)
+
+function region_config()
+    reg = get(ENV, "RIOT_REGION", "NA")
+    regions[reg]
+end
+
 function load_league(league)
-    riot_get("na1", "tft/league/v1/$(league)")
+    region = region_config().region
+    riot_get(region, "tft/league/v1/$(league)")
 end
 
 function load_summoner(id)
-    riot_get("na1", "tft/summoner/v1/summoners/$(id)"; cache_key = "summoner")
+    region = region_config().region
+    riot_get(region, "tft/summoner/v1/summoners/$(id)"; cache_key = "summoner")
 end
 
 function load_matches_for(puuid)
-    riot_get("americas", "tft/match/v1/matches/by-puuid/$(puuid)/ids"; sleep_duration = 2)
+    gateway = region_config().gateway
+    riot_get(gateway, "tft/match/v1/matches/by-puuid/$(puuid)/ids"; sleep_duration = 2)
 end
 
 function load_match(id)
-    riot_get("americas", "tft/match/v1/matches/$(id)"; cache_key = "match", sleep_duration = 1.5)
+    gateway = region_config().gateway
+    riot_get(gateway, "tft/match/v1/matches/$(id)"; cache_key = "match", sleep_duration = 1.5)
 end
 
 
