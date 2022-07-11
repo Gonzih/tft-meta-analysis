@@ -32,12 +32,18 @@ export load_league,
     region_config
 
 function current_region()
-  get(ENV, "RIOT_REGION", "NA")
+    get(ENV, "RIOT_REGION", "NA")
 end
 
 function region_config()
     reg = current_region()
     regions[reg]
+end
+
+
+function all_match_files()
+  region = current_region()
+  files = glob("$(region)-match-*.json", "cache/")
 end
 
 function riot_get(routing, path; cache_key = "get", sleep_duration = 1)
@@ -61,8 +67,8 @@ function riot_get(routing, path; cache_key = "get", sleep_duration = 1)
 end
 
 regions = Dict(
-    "NA"=>(region="na1", gateway="americas"),
-    "CN"=>(region="cn1", gateway="asia"),
+    "NA" => (region = "na1", gateway = "americas"),
+    "CN" => (region = "cn1", gateway = "asia"),
 )
 
 function load_league(league)
@@ -111,7 +117,7 @@ function scrape_league(l)
 end
 
 function all_matches_from_cache()
-    files = glob("match-*.json", "cache/")
+    files = all_match_files()
     map((fname) -> JSON.parse(open(f -> read(f, String), fname)), files)
 end
 
@@ -219,71 +225,73 @@ function filter_by_datetime(r, n_days)::Bool
     is_date_less_than(r.MatchDateTime, n_days)
 end
 
-    function matches_df()::RiotData
-        files = glob("match-*.json", "cache/")
-        match_data = map((fname) -> JSON.parse(open(f -> read(f, String), fname)), files)
+function matches_df()::RiotData
+    region = current_region()
+    files = all_match_files()
+    match_data = map((fname) -> JSON.parse(open(f -> read(f, String), fname)), files)
 
-        rd = RiotData(DataFrame(), DataFrame(), DataFrame(), DataFrame(), DataFrame(), DataFrame())
-        foreach(m -> parse_match(rd, m), match_data)
+    rd = RiotData(DataFrame(), DataFrame(), DataFrame(), DataFrame(), DataFrame(), DataFrame())
+    foreach(m -> parse_match(rd, m), match_data)
 
-        rd
+    rd
+end
+
+df_files = ["matches", "participants", "augments", "traits", "units", "items"]
+data_archive_location = "https://github.com/Gonzih/tft-meta-analysis/raw/main/data.tar.bz2"
+
+function export_all_data(data::RiotData)
+    dfs = Dict("matches" => data.matches, "participants" => data.participants, "augments" => data.augments, "traits" => data.traits, "units" => data.units, "items" => data.items)
+
+    for (fname, df) in dfs
+        CSV.write("data/$(fname).csv", df)
     end
+end
 
-    df_files = ["matches", "participants", "augments", "traits", "units", "items"]
-    data_archive_location = "https://github.com/Gonzih/tft-meta-analysis/raw/main/data.tar.bz2"
+function fltr!(df, puuids)
+    filter!((r) -> r.PUUID in puuids, df)
+end
 
-    function export_all_data(data::RiotData)
-        dfs = Dict("matches" => data.matches, "participants" => data.participants, "augments" => data.augments, "traits" => data.traits, "units" => data.units, "items" => data.items)
+function import_all_data(n_days::Int64, placement::Int64)
+    dfs = map((f) -> DataFrame(CSV.File("data/$(f).csv")), df_files)
 
-        for (fname, df) in dfs
-            CSV.write("data/$(fname).csv", df)
+    matches_df = first(dfs)
+    match_ids = unique(filter((r) -> filter_by_datetime(r, n_days), matches_df).MatchID)
+
+    participants_df = dfs[2]
+    puuids = unique(filter((r) -> r.Placement <= placement, participants_df).PUUID)
+
+    dfs = map((df) -> filter((r) -> r.MatchID in match_ids, df), dfs)
+
+    data = RiotData(dfs...)
+
+    fltr!(data.participants, puuids)
+    fltr!(data.augments, puuids)
+    fltr!(data.traits, puuids)
+    fltr!(data.units, puuids)
+    fltr!(data.items, puuids)
+
+    data
+end
+
+function is_data_present()
+    all(f -> isfile("data/$(f).csv"), df_files)
+end
+
+function download_data() end
+
+function rm_old_data(n_days::Int64)
+    region = current_region()
+    files = all_match_files()
+
+    for fname in files
+        match = JSON.parse(open(f -> read(f, String), fname))
+        match_dt = match["info"]["game_datetime"]
+        dt = Dates.unix2datetime(match_dt / 1000)
+        if !is_date_less_than(dt, 7)
+            println("Removing $(fname)")
+            rm(fname)
         end
     end
-
-    function fltr!(df, puuids)
-        filter!((r) -> r.PUUID in puuids, df)
-    end
-
-    function import_all_data(n_days::Int64, placement::Int64)
-        dfs = map((f) -> DataFrame(CSV.File("data/$(f).csv")), df_files)
-
-        matches_df = first(dfs)
-        match_ids = unique(filter((r) -> filter_by_datetime(r, n_days), matches_df).MatchID)
-
-        participants_df = dfs[2]
-        puuids = unique(filter((r) -> r.Placement <= placement, participants_df).PUUID)
-
-        dfs = map((df) -> filter((r) -> r.MatchID in match_ids, df), dfs)
-
-        data = RiotData(dfs...)
-
-        fltr!(data.participants, puuids)
-        fltr!(data.augments, puuids)
-        fltr!(data.traits, puuids)
-        fltr!(data.units, puuids)
-        fltr!(data.items, puuids)
-
-        data
-    end
-
-    function is_data_present()
-        all(f -> isfile("data/$(f).csv"), df_files)
-    end
-
-    function download_data() end
-
-    function rm_old_data(n_days::Int64)
-        files = glob("match-*.json", "cache/")
-
-        for fname in files
-            match = JSON.parse(open(f -> read(f, String), fname))
-            match_dt = match["info"]["game_datetime"]
-            dt = Dates.unix2datetime(match_dt / 1000)
-            if !is_date_less_than(dt, 7)
-                println("Removing $(fname)")
-                rm(fname)
-            end
-        end
-    end
+end
 
 end
