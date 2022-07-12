@@ -1,7 +1,8 @@
 include("../src/riot.jl")
 using Main.Riot
 
-leagues = ["grandmaster", "challenger", "master"]
+# leagues = ["grandmaster", "challenger", "master"]
+leagues = ["challenger"]
 matches = flatten(map(scrape_league, leagues))
 
 println("Gonna scrape $(length(matches)) matches")
