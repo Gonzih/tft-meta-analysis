@@ -16,6 +16,9 @@ export:
 export-notebooks:
 	cd notebooks && $(JULIA) scripts/export_notebooks.jl
 
+export-league-data:
+	cd notebooks && $(JULIA) scripts/export_league_data.jl
+
 server:
 	cd notebooks && $(JULIA) scripts/server.jl
 
