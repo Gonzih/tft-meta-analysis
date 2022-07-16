@@ -10,7 +10,7 @@ import JSON
 
 champs = map(Main.Viz.mapcharname, unique(rd.units.CharacterID))
 items = map(Main.Viz.mapitemname, unique(rd.items.Item))
-augs = map(Main.Viz.mapaugmentname, unique(rd.augments.Augment))
+augs = unique(map(Main.Viz.mapaugmentname, unique(rd.augments.Augment)))
 traits = map(Main.Viz.maptraitname, unique(rd.traits.Trait))
 
 champ_rarity = filter(
